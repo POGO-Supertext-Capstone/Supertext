@@ -15,12 +15,12 @@ This ADR lays out the conventions for creating and maintaining endpoints for the
 Endpoints should be lower case and use kebab-case. File extensions should be ommitted from endpoints. In general, try to follow general [REST API naming conventions and best practices](https://restfulapi.net/resource-naming/) 
 
 ### Versioned Endpoints
-All endpoints should be versioned. (EX /v1/upload, /v2/upload). Versions should be updated when major changes are added, including changing the payload parameters, arguments, etc. 
+All endpoints should be versioned. (EX /v1/upload, /v2/upload). Versions should be updated when major client-facing changes are introduced, including changing the payload parameters, arguments, etc. 
 
-Endpoints should be backwards compatatible even if they aren't used, meaning the end user should still be able to access the software if they are on a different version.
+Endpoints should be backwards compatatible even if they aren't used, meaning the end user should still be able to access the software if they are access it through an old endpoint.
 
 ### Payloads
-Payloads should be formatted as JSON for both GET and POST endpoints. Keys should be formated using camel case. 
+Payloads should be formatted as JSON or [multipart/form-data](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/MIME_types#multipartform-data) for both GET and POST endpoints. Keys should be formated using camel case. 
 
 Payload information should be nested in keywords for what is being returned. The current allowed keywords are:
 - `data`: main information for the endpoint.
@@ -44,7 +44,7 @@ Example failure:
 ```json
 {
   "error": {
-    "code": "RESOURCE_NOT_FOUND",
+    "code": "NOT FOUND",
     "message": "The requested resource was not found."
   }
 }
@@ -53,7 +53,7 @@ Example failure:
 ### Status / Error Codes
 Status codes should follow [standard HTTP staus codes](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status)
 
-Error codes should be formatted in uppercase snake case, and should be clear by the code alone.
+Error codes should be formatted as uppercase, and should match HTTP error code. Message field should be used to describe what exactly went wrong.
 
 ### Arguments
 Path seperators should be used for accessing an individual resources (e.g. /v1/edit/<presentation_name>) and to represent structural heirarchy.
