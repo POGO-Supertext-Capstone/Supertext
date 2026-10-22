@@ -30,8 +30,17 @@ An example for getting the slides using HTMX could be:
 
 These slides can then be read in by JS for later use.
 
+It is the server's responsiility to decode the slides into HTML before they are sent to the client. An example decoded slide would look like:
+
+```HTML
+<div id="slide-1">
+  <p>This is a <i>slide</i></p>
+  <p>With multiple lines</p>
+</div>
+```
+
 ### JavaScript
-For handling sending lyrics to the clients, Server-Sent Events (SSE) will be used to trigger the changing of slides. JS will also be responsibe for decoding the markdown format that the slides are saved in.
+For handling sending lyrics to the clients, Server-Sent Events (SSE) will be used to trigger the changing of slides. 
 
 The server will send out slide numbers via the endpoint `/vx/present`. When a slide is to be changed, the server should send the event: 
 
@@ -51,12 +60,11 @@ One alternative discussed was using pure HTMX for the frontend. This was eventua
 ### Positive
 - **Separation of concerns:** HTMX will handle the initial retrieval of slide data, while JavaScript will handle slide parsing, rendering, and live presentation updates.
 - **Reduced server communication during presentations:** The client can retrieve the presentation once and use the locally stored slide data as the server sends slide-change events, rather than requesting the full slide content for every change.
-- **Flexible presentation logic:** JavaScript gives the client greater control over how slides are decoded, stored, rendered, and transitioned between.
+- **Flexible presentation logic:** JavaScript gives the client greater control over how slides are stored, rendered, and transitioned between.
 
 ### Negative
-- **Initial loading dependency:** The client must successfully retrieve and parse the presentation before it can display slides. Loading failures or malformed slide data may prevent the presentation from working correctly.
+- **Initial loading dependency:** The client must successfully retrieve the presentation before it can display slides. Loading failures or malformed slide data may prevent the presentation from working correctly.
 - **Connection and recovery handling:** SSE connections can be interrupted. The frontend must account for reconnection behavior and ensure that clients return to the current slide after reconnecting.
-- **Parsing and rendering responsibility:** The frontend must correctly interpret the presentation's Markdown format. Changes to the format may require corresponding updates to the JavaScript parser and renderer.
 
 ### Neutral
 - **Hybrid frontend architecture:** The application will use both HTMX and custom JavaScript rather than relying exclusively on either approach.
