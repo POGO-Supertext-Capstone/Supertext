@@ -1,4 +1,4 @@
-# ADR-003: Fronend Conventions 
+# ADR-003: Frontend Conventions 
 
 ### Submitters
 - Tom Sharp
@@ -16,7 +16,7 @@ This ADR focuses on the front end experience for audience members, and not on th
 Supertext will use a combination of HTMX and JavaScript to handle frontend interactions.
 
 ### HTMX
-Once a user connects to the server, they will recieve the full presentation in a markdown format. HTMX will be used to connect the client to the server and recieve the slides. 
+Once a user connects to the server, they will receive the full presentation in a markdown format. HTMX will be used to connect the client to the server and receive the slides. 
 
 An example for getting the slides using HTMX could be:
 
@@ -30,7 +30,7 @@ An example for getting the slides using HTMX could be:
 
 These slides can then be read in by JS for later use.
 
-It is the server's responsiility to decode the slides into HTML before they are sent to the client. An example decoded slide would look like:
+It is the server's responsibility to decode the slides into HTML before they are sent to the client. An example decoded slide would look like:
 
 ```HTML
 <div id="slide-1">
@@ -53,7 +53,7 @@ Where the `data` section holds the slide number to present.
 
 ### Alternatives
 
-One alternative discussed was using pure HTMX for the frontend. This was eventually decided against as we wanted the flexablity to control how slide data is sent, stored, and presented via server sent events. 
+One alternative discussed was using pure HTMX for the frontend. This was eventually decided against as we wanted the flexibility to control how slide data is sent, stored, and presented via server sent events. 
 
 ## Consequences
 
