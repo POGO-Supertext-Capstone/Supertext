@@ -1,4 +1,4 @@
-# ADR-003: Fronend Conventions 
+# ADR-003: Frontend Conventions 
 
 ### Submitters
 - Tom Sharp
@@ -30,7 +30,7 @@ An example for getting the slides using HTMX could be:
 
 These slides can then be read in by JS for later presentation.
 
-It is the server's responsiility to decode the slides into HTML before they are sent to the client. An example decoded slide would look like:
+It is the server's responsibility to decode the slides into HTML before they are sent to the client. An example decoded slide would look like:
 
 ```HTML
 <div id="slide-1">
@@ -53,7 +53,7 @@ Where the `data` section holds the slide number to present.
 
 ### Alternatives
 
-One alternative discussed was using pure HTMX for the frontend. This was eventually decided against as we wanted the flexablity to control how slide data is sent, stored, and presented via server sent events. 
+One alternative discussed was using pure HTMX for the frontend. This was eventually decided against as we wanted the flexibility to control how slide data is sent, stored, and presented via server sent events. 
 
 The other alternative discussed was using strictly HTML and JavaScript. This was also decided against as we felt that HTMX provided some features that could be helpful / make our lives easier.
 
