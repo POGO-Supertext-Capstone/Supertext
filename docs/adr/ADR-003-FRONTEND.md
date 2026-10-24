@@ -16,7 +16,7 @@ This ADR focuses on the frontend experience for audience members, and not on the
 Supertext will use a combination of HTMX and pure JavaScript to handle frontend interactions.
 
 ### HTMX
-HTMX will be used to connect the client to the server. Once a client connects to the server via the endpoint `/vx/attend`, they will receive the full presentation in a presentable format.
+HTMX will be used to connect the client to the server. Once a client connects to the server via the endpoint `/vx/slides`, they will receive the full presentation in a presentable format.
 
 An example for getting the slides using HTMX could be:
 
@@ -30,13 +30,28 @@ An example for getting the slides using HTMX could be:
 
 These slides can then be read in by JS for later presentation.
 
-It is the server's responsibility to decode the slides into HTML before they are sent to the client. An example decoded slide would look like:
+It is the server's responsibility to decode the slides into before they are sent to the client. Slides will be sent as a JSON document with limited HTML tags to supprt text types. 
 
-```HTML
-<div id="slide-1">
-  <p>This is a <i>slide</i></p>
-  <p>With multiple lines</p>
-</div>
+The current allowed tags are:
+- `p`: for seperating lines 
+- `b`: for bolded text
+- `i` for italisized text
+
+Although this is subject to change. An example of a `slides` object would be:
+
+```json
+{
+  "slides": [
+    {
+      "slideNum": 1,
+      "data": "<p>This is slide 1</p>"
+    },
+    {
+      "slideNum": 2,
+      "data": "<p>This is slide 2</p><p>with <b>multiple</b> lines</p>"
+    }
+  ]
+}
 ```
 
 ### JavaScript
