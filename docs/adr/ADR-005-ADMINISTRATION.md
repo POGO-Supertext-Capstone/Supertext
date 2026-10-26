@@ -1,24 +1,22 @@
-# ADR-004: Administration Page
+# ADR-005: Administration Page
 
 ### Proposers: 
 - Jacob Hampton <hamptjac@oregonstate.edu>
 
-
-## Status Proposed:
+## Status: Proposed
 
 ## Context:
-This ADR standardises the database format and engine selection for the Supertext program and explains the rationale behind the selected database solution and expected format.
+This ADR defines the architectural pattern and operational requirements for the administration page.
 
 The supertext system requires a dedicated management interface for showrunners and operators running on the local Raspberry Pi 5 network. The admin portal must handle initial slideshow file ingestion, visual verification, live script adjustments without full re-uploads, and keyboard-driven show progression. 
 
-
 ## Decision:
-The administration page will be built as a protected server-rendered module with the Go backend, utilizing HTMX and pure JS for dynamic UI updates and server-sent updates, specifically tailored for local browser access by the showrunner. 
+The administration page will be built as a protected server-rendered module with the Go backend, utilizing HTMX and pure JS for dynamic UI updates and server-sent updates, specifically tailored for local browser access by the showrunner. The administration routes are protected via local network isolation and session/password check to restrict access from patron devices on the public Wi-Fi network. 
 
 ### Core architectural decisions:
-- **Unified Go backend Route:** Admin handlers will reside in the core Go binary running on the Raspberry Pi 5, ensuring zero extra external service dependencies.
+- **Unified Go backend Route:** Admin route handlers will reside in the core Go binary running on the Raspberry Pi 5, ensuring zero extra external service dependencies.
 
-- **File ingestion and visual verification pipeline:** The portal will accept initial slideshow file formats (e.g., .pptx, .txt), parse them into structured records within our selected database engine (Bbolt), and render a visual verification view so the showrunner can review slide sequencing prior to showtime. 
+- **File ingestion and visual verification pipeline:** The portal will accept initial slideshow file formats (e.g., .pptx, .txt), parse raw files into structured application records, and save those records within the database engine, rendering a visual verification view so the showrunner can review slide sequencing before showtime
   
 - **In-place slide editing API:** The admin interface will support direct, on-device slide text editing via the UI so showrunners can make corrections during rehearsal or pre-show checks without needing to re-upload the entire source presentation file.
   
@@ -37,4 +35,4 @@ An alternative to this is static file re-uploading for every edit, but this was 
 - **State coordination:** Requires careful backend synchronization between BBolt database records, the active presentation cache, and active SSE broadcast channels when inline edits occur.
 
 ## Change Log
-- V1 (10	/24/2026) Initial ADR – Jacob Hampton <hamptjac@oregonstate.edu> 
+- V1 (10/24/2026) Initial ADR – Jacob Hampton <hamptjac@oregonstate.edu> 
