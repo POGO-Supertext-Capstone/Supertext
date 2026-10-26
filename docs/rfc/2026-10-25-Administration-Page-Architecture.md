@@ -11,6 +11,7 @@
 
 ## Problem and Context: 
 This RFC outlines the architectural and design requirements for the administration page and management interface of the Supertext application. Operating on a local Raspberry Pi 5 captive Wi-Fi network during live opera performances, the system requires a robust, dedicated portal for the showrunner. This portal must handle the initial performance script ingestion (.pptx, .txt), render visual verification views so showrunners can review slide sequencing prior to showtime, support in-place text corrections during pre-show rehearsals without requiring full file re-uploads, and integrate physical keyboard hotkeys for real-time prompter control.
+
 Choosing the core architectural pattern for the administration page. Specifically, whether to build a decoupled single-page application, rely on constructed standalone endpoints, or implement a unified server-rendered module using Go and HTMX is an important foundational decision. It dictates our backend routing structure, authentication boundaries, deployment topology, and frontend maintenance overhead. If the team commits to a complex decoupled framework or unstructured custom routes mid-project, refactoring the frontend build toolchain and API contracts on an embedded edge device would cost significantly more than establishing the correct architectural boundary now. 
 
 ## Options:
