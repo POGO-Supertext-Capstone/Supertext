@@ -21,30 +21,40 @@ Build the administration interface as a protected server-rendered module within 
 
 - **Benefits:** Keeps the entire application within a single Go binary with zero external service dependencies or complex Node.js toolchains. Delivers quick DOM updates via HTMX and server-rendered HTML fragments, preserving memory on the Raspberry Pi 5.
 - **Costs:** Requires writing server-rendered HTML templates and managing DOM updates via HTML fragments rather than leveraging a heavy client-side component framework.
+- **Right choice when:"** The application is deployed on an edge device that must operate entirely offline minimal resource overhead and zero external service dependencies.
   
 ### Option B: Decoupled single-page application (SPA) using react/TypeScript served through Go
 Develop a standalone single-page application using React, Vite, and Tailwind CSS, communicating with the Go backend exclusively through a JSON REST API. Static build assets are embedded into the Go binary or served from disk. 
 
 - **Benefits:** provides a rich component ecosystem and advanced client-side state management capabilities. 
-- **Costs:** introduces a heavy Node.js build toolchain, increases binary build complexity, and requires managing client-side routing, state hydration, and separate API authentication tokens on an embedded device. 
+- **Costs:** introduces a heavy Node.js build toolchain, increases binary build complexity, and requires managing client-side routing, state hydration, and separate API authentication tokens on an embedded device.
+- **Right choice when:"** The administrative dashboard requires complex data visualization, multi-user real-time collaborative editing, or rich client-side state management that exceeds server-rendered capabilities
 
 ### Option C: Do nothing
 Rely on basic, unauthenticated static HTML forms or manual command-line database scripts run via SSH on the Raspberry Pi 5 to manage shows, upload scripts, and edit text records. 
 
 - **Benefits:** Zero initial development overhead for UI routing.
 - **Costs:** Severe security vulnerabilities, high operational friction during live rehearsals, zero visual verification tools for showrunners, and extreme risk of human error during showtime.
+- **Right choice when:"** The applicatoin is an internal developer utility with a single technical user and zero live performance time contraints
 
 ### Option D: Static file re-uploading for every edit
 Require showrunners to re-upload the entire source presentation file every time a single type or line correction is needed during rehearsal. 
 
 - **Benefits:** avoids building an in-place API or database mutation endpoints for individual slides
 - **Costs:** Extremely slow and error-prone during live opera environments where quick fixes are needed immediately, risking script desynchronization.
+- **Right choice when:"** Presentations are strictly immutable and rehearsal turnaround time is not relevant. 
 
 ## Analysis
 
-| Concern:                      | A: Unified Go and HTMX | B: Decoupled SPA	   | C: Do nothing	 | D: Static re-upload |
+Meeting the live rehearsal needs can be defined as an approach that satisfies the operational requirements during active pre-show rehearsals and performances on the local Raspberry Pi 5 network. The requirements are as follows:
+- **Low-latency in-place editing:** allows showrunners to make immediate text corrections and adjustments through the management interface without requiring full file re-uploads or server restarts. 
+- **Instant visual verification:** Renders structured cue sequences immediately upon ingestion or editing, giving the showrunner visual confirmation of formatting and layout before patrons connect.
+- **Hight fault tolerance:** Prevent malformed inputs, accidental syntax errors, or unexpected edge cases from crashing the application server or corrupting active database state.
+- **Speed and responsiveness:** Delivers near instant UI feedback and seamless keyboard-driven hotkey integration so operators can navigate scripts with zero perceptible lag.
+
+| Concern                       | A: Unified Go and HTMX | B: Decoupled SPA	   | C: Do nothing	 | D: Static re-upload |
 | ----------------------------- | ---------------------- | ------------------- | --------------- | ------------------- |
-| Edge resource:                | Low (single Go binary) | High(Node/Vite)     | Low             | Low                 |
+| Edge resource                 | Low (single Go binary) | High(Node/Vite)     | Low             | Low                 |
 | Development complexity        | Low to moderate        | High (dual stack)   | Low             | Low                 |
 | Real-time inline editing      | Yes (HTMX/SSE)         | Yes (REST/State)    | No              | No                  |
 | Security and route protection | Native Go middleware   | Token/CORS overhead | None            | None                |
@@ -74,4 +84,4 @@ Adopt option A. Build the administration interface as a protected server-rendere
 -	Where you stopped and validated the result yourself, and why those points: TODO (author). Since the analysis above has not been backed by a prototype or benchmark yet, these claims must be personally verified.
 
 ## Decision:
-Proposed, until your team decides. Then accepted, rejected, or superseded, with the date and who chaired the decision. If superseded, link the RFC that replaces this one.
+Proposed
