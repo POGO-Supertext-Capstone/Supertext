@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/web/js/htmx.min.js"></script>
+    <title>Upload PPTX</title>
+</head>
+<body>
+
+<form
+  hx-post="/v1/upload"
+  hx-encoding="multipart/form-data"
+  hx-swap="outerHTML"
+  _="on htmx:xhr:progress(loaded, total)
+     set #progress.value to (loaded / total) * 100"
+>
+  <div>
+    <label for="name">Presentation Name</label>
+    <input type="text" id="name" name="name" required>
+  </div>
+
+  <div>
+    <label for="file">File (PPTX):</label>
+    <input type="file" id="file" name="file"
+           accept=".pptx" required>
+  </div>
+
+  <progress id="progress" value="0" max="100"></progress>
+
+  <button type="submit">Upload</button>
+</form>
+
+</body>
+</html>
