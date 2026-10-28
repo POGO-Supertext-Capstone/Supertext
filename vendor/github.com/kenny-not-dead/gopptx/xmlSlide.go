@@ -727,6 +727,7 @@ type DecodeRuns struct {
 
 type DecodeRunProperties struct {
 	Bold          *int             `xml:"b,attr,omitempty"`
+	Italic        *int             `xml:"i,attr,omitempty"`
 	Lang          string           `xml:"lang,attr,omitempty"`
 	Size          *int             `xml:"sz,attr,omitempty"`
 	Space         *int             `xml:"spc,attr,omitempty"`
