@@ -65,7 +65,7 @@ func v1_upload(w http.ResponseWriter, r *http.Request) {
 		uploadData.TmpFilePath = tmpFile.Name()	// location of temp file 
 
 		// Decode PPTX
-		go upload.DecodePPTX(uploadData);
+		go uploadPPTX(uploadData);
 
     fmt.Println("Uploaded:", h.Filename)
     fmt.Println("Saved to:", tmpFile.Name())
@@ -74,6 +74,15 @@ func v1_upload(w http.ResponseWriter, r *http.Request) {
 		// Return 405
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
+}
+
+func uploadPPTX(uploadData upload.PresentationUpload) {
+	slides, err := upload.DecodePPTX(uploadData);
+	if (err != nil) {
+		log.Printf("Failed to decode PPTX: %v", err)
+		return
+	}
+	// upload to dtabase
 }
 
 func main() {

@@ -2,7 +2,6 @@ package upload
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"strings"
 
@@ -21,7 +20,7 @@ type runInfo struct {
 	Italic	bool;
 }
 
-type slideContent struct {
+type SlideContent struct {
 	Index			int;
 	ID				int;
 	Content		string;
@@ -30,24 +29,22 @@ type slideContent struct {
 // DecodePPTX goes throgh a powerpoint file and converts the slide content
 // into plain text with appropiate HTML tags, include <p> to denote a new line,
 // <i> to denote italics, and <b> to denote boldness. 
-func DecodePPTX(uploadData PresentationUpload) {
+func DecodePPTX(uploadData PresentationUpload) ([]SlideContent, error) {
   defer os.Remove(uploadData.TmpFilePath)
 	
 	f, err := gopptx.OpenFile(uploadData.TmpFilePath)
 	if err != nil {
-    log.Fatal("Failed to open temp:",err)
-		return;
+    return nil, fmt.Errorf("failed to open temp file: %w", err)
   }
   defer f.Close()
 
 	// read slide data
-	slides := make([]slideContent, len(f.Presentation.Slides.Slide))
+	slides := make([]SlideContent, len(f.Presentation.Slides.Slide))
 
 	for i, slide := range f.Presentation.Slides.Slide {
     shapes, err := f.GetShapes(slide.SlideID)
     if err != nil {
-      log.Printf("Error reading shapes from slide %d: %v", slide.SlideID, err)
-      continue
+      return nil, fmt.Errorf("Error reading shapes from slide %d: %v", slide.SlideID, err)
     }
 
     //fmt.Printf("Slide %d (index %d):\n", slide.SlideID, i)
@@ -63,7 +60,8 @@ func DecodePPTX(uploadData PresentationUpload) {
     }
 		slides[i].Content = content
 	}
-	debugPrintSlides(slides)
+
+	return slides, nil
 }
 
 // decodeRun decodes the properties of a run and saves them to a 
@@ -115,7 +113,7 @@ func decodeParagraph(paragraph gopptx.DecodeParagraph) string {
     return result.String()
 }
 
-func debugPrintSlides(slides []slideContent) {
+func DebugPrintSlides(slides []SlideContent) {
 	for _, slide := range slides {
 		fmt.Printf("Slide %d (ID: %d)", slide.Index, slide.ID)
 		fmt.Println(slide.Content)
