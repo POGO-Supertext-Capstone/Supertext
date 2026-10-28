@@ -6,9 +6,10 @@ import (
 	"os"
 	"io"
 	"path"
-	"github.com/POGO-Supertext-Capstone/Supertext/internal/upload"
 	"net/http"
 	"log"
+
+	"github.com/POGO-Supertext-Capstone/Supertext/internal/upload"
 )
 
 func v1_index(w http.ResponseWriter, r *http.Request) {
@@ -32,26 +33,39 @@ func v1_upload(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, p)
 	case http.MethodPost:
 		fmt.Println("POST")
-		
+
+		// grab form data
 		file, h, err := r.FormFile("file")
+		name := r.FormValue("name")
+
     if err != nil {
-        http.Error(w, "Failed to read uploaded file", http.StatusBadRequest)
+      http.Error(w, "Failed to read uploaded file", http.StatusBadRequest)
       return
   	}
     defer file.Close()
 
+		// create temp file to hold pptx data
     tmpFile, err := os.CreateTemp("", "presentation-*"+path.Ext(h.Filename))
     if err != nil {
       http.Error(w, "Failed to create temporary file", http.StatusInternalServerError)
       return
     }
     defer tmpFile.Close()
-  	defer os.Remove(tmpFile.Name())
 
+		// copy contents to temp file
     if _, err := io.Copy(tmpFile, file); err != nil {
       http.Error(w, "Failed to save uploaded file", http.StatusInternalServerError)
     	return
   	}
+
+		// collect data for presentation upload
+		var uploadData upload.PresentationUpload
+		uploadData.PresentationName = name			// Presentation name (provided by user)
+		uploadData.Filename = h.Filename				// Original file name (provided by user)
+		uploadData.TmpFilePath = tmpFile.Name()	// location of temp file 
+
+		// Decode PPTX
+		go upload.DecodePPTX(uploadData);
 
     fmt.Println("Uploaded:", h.Filename)
     fmt.Println("Saved to:", tmpFile.Name())
@@ -63,9 +77,6 @@ func v1_upload(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	fmt.Println("Hello Beavers!")
-	upload.Test()
-
 	http.HandleFunc("/", v1_index)
 	http.HandleFunc("/v1/upload", v1_upload)
 
