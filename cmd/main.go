@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
-	"strings"
-	"os"
 	"io"
-	"path"
-	"net/http"
 	"log"
+	"net/http"
+	"os"
+	"path"
+	"strings"
 
 	"github.com/POGO-Supertext-Capstone/Supertext/internal/upload"
 )
@@ -17,7 +17,7 @@ func v1_index(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "web/static/index.html")
 		return
 	}
-	if (strings.HasPrefix(r.URL.Path, "/web/")) {
+	if strings.HasPrefix(r.URL.Path, "/web/") {
 		http.ServeFile(w, r, "."+r.URL.Path)
 		return
 	}
@@ -28,7 +28,7 @@ func v1_upload(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		fmt.Println("GET")
-		
+
 		p := "web/static/upload.html"
 		http.ServeFile(w, r, p)
 	case http.MethodPost:
@@ -54,18 +54,18 @@ func v1_upload(w http.ResponseWriter, r *http.Request) {
 
 		// copy contents to temp file
 		if _, err := io.Copy(tmpFile, file); err != nil {
-		http.Error(w, "Failed to save uploaded file", http.StatusInternalServerError)
+			http.Error(w, "Failed to save uploaded file", http.StatusInternalServerError)
 			return
 		}
 
 		// collect data for presentation upload
 		var uploadData upload.PresentationUpload
-		uploadData.PresentationName = name			// Presentation name (provided by user)
-		uploadData.Filename = h.Filename				// Original file name (provided by user)
-		uploadData.TmpFilePath = tmpFile.Name()	// location of temp file 
+		uploadData.PresentationName = name      // Presentation name (provided by user)
+		uploadData.Filename = h.Filename        // Original file name (provided by user)
+		uploadData.TmpFilePath = tmpFile.Name() // location of temp file
 
 		// Decode PPTX
-		go uploadPPTX(uploadData);
+		go uploadPPTX(uploadData)
 
 		fmt.Println("Uploaded:", h.Filename)
 		fmt.Println("Saved to:", tmpFile.Name())
@@ -77,13 +77,13 @@ func v1_upload(w http.ResponseWriter, r *http.Request) {
 }
 
 func uploadPPTX(uploadData upload.PresentationUpload) {
-	slides, err := upload.DecodePPTX(uploadData);
-	if (err != nil) {
+	slides, err := upload.DecodePPTX(uploadData)
+	if err != nil {
 		log.Printf("Failed to decode PPTX: %v", err)
 		return
 	}
-	_ = slides
-	// upload to database
+	upload.DebugPrintSlides(slides)
+	// upload to database (TBI)
 }
 
 func main() {
