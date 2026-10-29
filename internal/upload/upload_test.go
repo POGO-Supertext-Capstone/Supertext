@@ -94,7 +94,7 @@ func TestDecodeParagraph(t *testing.T) {
 		{
 			name:      "empty paragraph",
 			paragraph: gopptx.DecodeParagraph{},
-			want:      "",
+			want:      "<p></p>",
 		},
 		{
 			name: "simple paragraph",
@@ -103,7 +103,7 @@ func TestDecodeParagraph(t *testing.T) {
 					{Text: "Hello, world!"},
 				},
 			},
-			want: "Hello, world!",
+			want: "<p>Hello, world!</p>",
 		},
 		{
 			name: "consecutive plain text runs",
@@ -113,7 +113,7 @@ func TestDecodeParagraph(t *testing.T) {
 					{Text: "world!"},
 				},
 			},
-			want: "Hello, world!",
+			want: "<p>Hello, world!</p>",
 		},
 		{
 			name: "combined paragraph 1",
@@ -123,7 +123,7 @@ func TestDecodeParagraph(t *testing.T) {
 					{Text: "¡Hola Mundo!", RunProperties: &gopptx.DecodeRunProperties{Italic: &true_int}},
 				},
 			},
-			want: "Hello, world! <i>¡Hola Mundo!</i>",
+			want: "<p>Hello, world! <i>¡Hola Mundo!</i></p>",
 		},
 		{
 			name: "combined paragraph 2",
@@ -135,7 +135,7 @@ func TestDecodeParagraph(t *testing.T) {
 					{Text: " dudes", RunProperties: &gopptx.DecodeRunProperties{Bold: &true_int}},
 				},
 			},
-			want: "What is<i> up</i> my<b> dudes</b>",
+			want: "<p>What is<i> up</i> my<b> dudes</b></p>",
 		},
 		{
 			name: "messy paragraph 1",
@@ -148,7 +148,7 @@ func TestDecodeParagraph(t *testing.T) {
 					{Text: "combined!", RunProperties: &gopptx.DecodeRunProperties{Italic: &true_int}},
 				},
 			},
-			want: "<i>likewise punctuation </i>should <i>be combined!</i>",
+			want: "<p><i>likewise punctuation </i>should <i>be combined!</i></p>",
 		},
 		{
 			name: "messy paragraph 2",
@@ -161,7 +161,7 @@ func TestDecodeParagraph(t *testing.T) {
 					{Text: "combined!", RunProperties: &gopptx.DecodeRunProperties{Italic: &true_int, Bold: &true_int}},
 				},
 			},
-			want: "<b>likewise </b><b><i>punctuation </i></b>should <b><i>be combined!</i></b>",
+			want: "<p><b>likewise </b><b><i>punctuation </i></b>should <b><i>be combined!</i></b></p>",
 		},
 	}
 
@@ -238,6 +238,8 @@ func TestDecodePPTXValidFile(t *testing.T) {
 		"<p></p>",
 		"<p>Test <b>Bold</b> slide</p>",
 		"<p>Test <b>Bold</b> and</p><p><i>Italic</i></p>",
+		"<p>Please silence all</p><p>electronic devices</p>",
+		"<p>Test Slide With</p><p>Animations</p>",
 	}
 
 	if len(slides) != len(expected) {

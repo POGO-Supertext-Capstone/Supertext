@@ -63,7 +63,11 @@ func DecodePPTX(uploadData PresentationUpload) ([]SlideContent, error) {
 		for _, shape := range shapes {
 			//fmt.Printf("Type: %T, Value: %+v\n", shape.TextBody.Paragraph, shape.TextBody.Paragraph)
 			for _, paragraph := range shape.TextBody.Paragraph {
-				content += "<p>" + decodeParagraph(paragraph) + "</p>"
+				if len(paragraph.Breaks) > 0 {
+					content += decodeLineBreakParagraph(paragraph)
+				} else {
+					content += decodeParagraph(paragraph)
+				}
 			}
 		}
 		slides[i].Content = content
@@ -92,6 +96,62 @@ func decodeParagraph(paragraph gopptx.DecodeParagraph) string {
 		runs[i] = decodeRun(run)
 	}
 
+	return "<p>" + encodeRunTags(runs) + "</p>"
+}
+
+// decodeParagraph decodes all the runs inside a paragraph, seperated by line breaks
+// and combines them based on similar formatting to save space and reduce
+// number of redundant tags
+func decodeLineBreakParagraph(paragraph gopptx.DecodeParagraph) string {
+	runs := make([]runInfo, len(paragraph.Runs))
+	run_indices := make([]int, len(paragraph.Runs))
+	for i, run := range paragraph.Runs {
+		runs[i] = decodeRun(run)
+		run_indices[i] = strings.Index(paragraph.InnerXML, runs[i].Text)
+	}
+
+	break_indices := []int{}
+	start := 0
+	for {
+		idx := strings.Index(paragraph.InnerXML[start:], "<a:br")
+		if idx == -1 {
+			break
+		}
+
+		start += idx
+		break_indices = append(break_indices, start)
+		start += len("<a:br")
+	}
+
+	// Split the runs into groups based on the breaks.
+	result := []gopptx.DecodeParagraph{}
+	current := gopptx.DecodeParagraph{ParagraphProperties: paragraph.ParagraphProperties}
+
+	breakIdx := 0
+	for i, run := range paragraph.Runs {
+		// If a break occurs before this run, start a new paragraph.
+		for breakIdx < len(break_indices) && break_indices[breakIdx] < run_indices[i] {
+			result = append(result, current)
+			current = gopptx.DecodeParagraph{ParagraphProperties: paragraph.ParagraphProperties}
+			breakIdx++
+		}
+
+		current.Runs = append(current.Runs, run)
+	}
+	result = append(result, current)
+
+	result_string := ""
+	for _, par := range result {
+		result_string += decodeParagraph(par)
+	}
+
+	return result_string
+
+}
+
+// encodeRunTags encodes all the runs in a paragraph with their
+// limited HTML tags
+func encodeRunTags(runs []runInfo) string {
 	var result strings.Builder
 
 	for i := 0; i < len(runs); {
