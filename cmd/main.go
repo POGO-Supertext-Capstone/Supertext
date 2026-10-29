@@ -13,10 +13,10 @@ import (
 )
 
 func v1_index(w http.ResponseWriter, r *http.Request) {
-  if r.URL.Path == "/" {
-    http.ServeFile(w, r, "web/static/index.html")
-    return
-  }
+	if r.URL.Path == "/" {
+		http.ServeFile(w, r, "web/static/index.html")
+		return
+	}
 	if (strings.HasPrefix(r.URL.Path, "/web/")) {
 		http.ServeFile(w, r, "."+r.URL.Path)
 		return
@@ -38,25 +38,25 @@ func v1_upload(w http.ResponseWriter, r *http.Request) {
 		file, h, err := r.FormFile("file")
 		name := r.FormValue("name")
 
-    if err != nil {
-      http.Error(w, "Failed to read uploaded file", http.StatusBadRequest)
-      return
-  	}
-    defer file.Close()
+		if err != nil {
+			http.Error(w, "Failed to read uploaded file", http.StatusBadRequest)
+			return
+		}
+		defer file.Close()
 
 		// create temp file to hold pptx data
-    tmpFile, err := os.CreateTemp("", "presentation-*"+path.Ext(h.Filename))
-    if err != nil {
-      http.Error(w, "Failed to create temporary file", http.StatusInternalServerError)
-      return
-    }
-    defer tmpFile.Close()
+		tmpFile, err := os.CreateTemp("", "presentation-*"+path.Ext(h.Filename))
+		if err != nil {
+			http.Error(w, "Failed to create temporary file", http.StatusInternalServerError)
+			return
+		}
+		defer tmpFile.Close()
 
 		// copy contents to temp file
-    if _, err := io.Copy(tmpFile, file); err != nil {
-      http.Error(w, "Failed to save uploaded file", http.StatusInternalServerError)
-    	return
-  	}
+		if _, err := io.Copy(tmpFile, file); err != nil {
+		http.Error(w, "Failed to save uploaded file", http.StatusInternalServerError)
+			return
+		}
 
 		// collect data for presentation upload
 		var uploadData upload.PresentationUpload
@@ -67,8 +67,8 @@ func v1_upload(w http.ResponseWriter, r *http.Request) {
 		// Decode PPTX
 		go uploadPPTX(uploadData);
 
-    fmt.Println("Uploaded:", h.Filename)
-    fmt.Println("Saved to:", tmpFile.Name())
+		fmt.Println("Uploaded:", h.Filename)
+		fmt.Println("Saved to:", tmpFile.Name())
 
 	default:
 		// Return 405
@@ -82,7 +82,8 @@ func uploadPPTX(uploadData upload.PresentationUpload) {
 		log.Printf("Failed to decode PPTX: %v", err)
 		return
 	}
-	// upload to dtabase
+	_ = slides
+	// upload to database
 }
 
 func main() {
