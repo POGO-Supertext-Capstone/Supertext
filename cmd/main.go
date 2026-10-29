@@ -12,6 +12,8 @@ import (
 	"github.com/POGO-Supertext-Capstone/Supertext/internal/upload"
 )
 
+// v1_index handles default HTTP file requests, as well as directing to
+// the home page when requested
 func v1_index(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/" {
 		http.ServeFile(w, r, "web/static/index.html")
@@ -23,6 +25,9 @@ func v1_index(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// v1_upload handles all requests coming through the /v1/upload endpoint.
+// GET requests return the HTML page with the form to upload the PPTX file,
+// and POST requests decode that file using the upload package
 func v1_upload(w http.ResponseWriter, r *http.Request) {
 	fmt.Print("/v1/upload : ")
 	switch r.Method {
@@ -67,8 +72,8 @@ func v1_upload(w http.ResponseWriter, r *http.Request) {
 		// Decode PPTX
 		go uploadPPTX(uploadData)
 
-		fmt.Println("Uploaded:", h.Filename)
-		fmt.Println("Saved to:", tmpFile.Name())
+		//fmt.Println("Uploaded:", h.Filename)
+		//fmt.Println("Saved to:", tmpFile.Name())
 
 	default:
 		// Return 405
@@ -76,6 +81,9 @@ func v1_upload(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// uploadPPTX handles the decoding and uplloading of a PPTX file
+// into the appropiate format to be saved in the database, and
+// parsed by other parts of the program
 func uploadPPTX(uploadData upload.PresentationUpload) {
 	slides, err := upload.DecodePPTX(uploadData)
 	if err != nil {

@@ -9,6 +9,9 @@ import (
 	"github.com/kenny-not-dead/gopptx"
 )
 
+// TestDecodeRun tests the decodeRun method in upload.go
+// to ensure that DecoderunProperties as well as Text is being
+// decoded properly
 func TestDecodeRun(t *testing.T) {
 	bold := 1
 	italic := 1
@@ -77,6 +80,9 @@ func TestDecodeRun(t *testing.T) {
 	}
 }
 
+// TestDecodeParagraph tests decodeParagraph method in upload.go
+// It ensures that runs are combined properly, and that it handles
+// overlapping run properties
 func TestDecodeParagraph(t *testing.T) {
 	true_int := 1
 
@@ -170,7 +176,9 @@ func TestDecodeParagraph(t *testing.T) {
 	}
 }
 
-func TestDecodePPTX_InvalidFile(t *testing.T) {
+// TestDecodePPTXInvalidFile tests that an invalid file will be
+// rejected by DecodePPTX method in upload.go
+func TestDecodePPTXInvalidFile(t *testing.T) {
 	tmpFile := filepath.Join(t.TempDir(), "invalid.pptx")
 
 	if err := os.WriteFile(tmpFile, []byte("not a PowerPoint file"), 0600); err != nil {
@@ -195,7 +203,9 @@ func TestDecodePPTX_InvalidFile(t *testing.T) {
 	}
 }
 
-func TestDecodePPTX_ValidFile(t *testing.T) {
+// TestDecodePPTXValidFile tests that the DecodePPTX method in upload.go
+// will accept good files, and decodes them properly.
+func TestDecodePPTXValidFile(t *testing.T) {
 	tmpFile, err := os.CreateTemp("", "presentation-*.pptx")
 	if err != nil {
 		t.Fatal(err)
