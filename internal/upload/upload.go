@@ -8,18 +8,26 @@ import (
 	"github.com/kenny-not-dead/gopptx"
 )
 
+// PresentationUpload holds data provided by the user in
+// the form upload, as well as the temporay file location
+// holding the copy for decoding
 type PresentationUpload struct {
 	PresentationName string
 	Filename         string
 	TmpFilePath      string
 }
 
+// runInfo holds info about a run of text, including its
+// content and formatting
 type runInfo struct {
 	Text   string
 	Bold   bool
 	Italic bool
 }
 
+// SlideContent holds the info about an individual slide
+// including its index (order in presentation), its unique slide ID
+// and the text content in that slide
 type SlideContent struct {
 	Index   int
 	ID      int
