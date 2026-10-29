@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -25,60 +24,50 @@ func v1_index(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// v1_upload handles all requests coming through the /v1/upload endpoint.
-// GET requests return the HTML page with the form to upload the PPTX file,
-// and POST requests decode that file using the upload package
-func v1_upload(w http.ResponseWriter, r *http.Request) {
-	fmt.Print("/v1/upload : ")
-	switch r.Method {
-	case http.MethodGet:
-		fmt.Println("GET")
+// v1_upload_get handles all GET requests coming through the
+// /v1/upload endpoint. Returns the HTML page with the form to upload
+// the PPTX file
+func v1_upload_get(w http.ResponseWriter, r *http.Request) {
+	p := "web/static/upload.html"
+	http.ServeFile(w, r, p)
+}
 
-		p := "web/static/upload.html"
-		http.ServeFile(w, r, p)
-	case http.MethodPost:
-		fmt.Println("POST")
+// v1_upload_post handles all POST requests coming through the
+// /v1/upload endpoint. Decodes the file passed through the form
+// using the upload package
+func v1_upload_post(w http.ResponseWriter, r *http.Request) {
+	// grab form data
+	name := r.FormValue("name")
+	file, h, err := r.FormFile("file")
 
-		// grab form data
-		file, h, err := r.FormFile("file")
-		name := r.FormValue("name")
-
-		if err != nil {
-			http.Error(w, "Failed to read uploaded file", http.StatusBadRequest)
-			return
-		}
-		defer file.Close()
-
-		// create temp file to hold pptx data
-		tmpFile, err := os.CreateTemp("", "presentation-*"+path.Ext(h.Filename))
-		if err != nil {
-			http.Error(w, "Failed to create temporary file", http.StatusInternalServerError)
-			return
-		}
-		defer tmpFile.Close()
-
-		// copy contents to temp file
-		if _, err := io.Copy(tmpFile, file); err != nil {
-			http.Error(w, "Failed to save uploaded file", http.StatusInternalServerError)
-			return
-		}
-
-		// collect data for presentation upload
-		var uploadData upload.PresentationUpload
-		uploadData.PresentationName = name      // Presentation name (provided by user)
-		uploadData.Filename = h.Filename        // Original file name (provided by user)
-		uploadData.TmpFilePath = tmpFile.Name() // location of temp file
-
-		// Decode PPTX
-		go uploadPPTX(uploadData)
-
-		//fmt.Println("Uploaded:", h.Filename)
-		//fmt.Println("Saved to:", tmpFile.Name())
-
-	default:
-		// Return 405
-		w.WriteHeader(http.StatusMethodNotAllowed)
+	http.Error(w, "Failed to read uploaded file", http.StatusBadRequest)
+	if err != nil {
+		return
 	}
+	defer file.Close()
+
+	// create temp file to hold pptx data
+	tmpFile, err := os.CreateTemp("", "presentation-*"+path.Ext(h.Filename))
+	if err != nil {
+		http.Error(w, "Failed to create temporary file", http.StatusInternalServerError)
+		return
+	}
+	defer tmpFile.Close()
+
+	// copy contents to temp file
+	if _, err := io.Copy(tmpFile, file); err != nil {
+		http.Error(w, "Failed to save uploaded file", http.StatusInternalServerError)
+		return
+	}
+
+	// collect data for presentation upload
+	var uploadData upload.PresentationUpload
+	uploadData.PresentationName = name      // Presentation name (provided by user)
+	uploadData.Filename = h.Filename        // Original file name (provided by user)
+	uploadData.TmpFilePath = tmpFile.Name() // location of temp file
+
+	// Decode PPTX
+	go uploadPPTX(uploadData)
 }
 
 // uploadPPTX handles the decoding and uplloading of a PPTX file
@@ -96,7 +85,8 @@ func uploadPPTX(uploadData upload.PresentationUpload) {
 
 func main() {
 	http.HandleFunc("/", v1_index)
-	http.HandleFunc("/v1/upload", v1_upload)
+	http.HandleFunc("GET /v1/upload", v1_upload_get)
+	http.HandleFunc("POST /v1/upload", v1_upload_post)
 
 	log.Fatal(http.ListenAndServe(":8081", nil))
 }
