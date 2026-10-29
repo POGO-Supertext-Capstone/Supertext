@@ -9,29 +9,29 @@ import (
 )
 
 type PresentationUpload struct {
-	PresentationName	string;
-	Filename					string;
-	TmpFilePath				string;
+	PresentationName string
+	Filename         string
+	TmpFilePath      string
 }
 
 type runInfo struct {
-	Text		string;
-	Bold		bool;
-	Italic	bool;
+	Text   string
+	Bold   bool
+	Italic bool
 }
 
 type SlideContent struct {
-	Index			int;
-	ID				int;
-	Content		string;
+	Index   int
+	ID      int
+	Content string
 }
 
 // DecodePPTX goes throgh a powerpoint file and converts the slide content
 // into plain text with appropiate HTML tags, include <p> to denote a new line,
-// <i> to denote italics, and <b> to denote boldness. 
+// <i> to denote italics, and <b> to denote boldness.
 func DecodePPTX(uploadData PresentationUpload) ([]SlideContent, error) {
 	defer os.Remove(uploadData.TmpFilePath)
-	
+
 	f, err := gopptx.OpenFile(uploadData.TmpFilePath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open temp file: %w", err)
@@ -64,7 +64,7 @@ func DecodePPTX(uploadData PresentationUpload) ([]SlideContent, error) {
 	return slides, nil
 }
 
-// decodeRun decodes the properties of a run and saves them to a 
+// decodeRun decodes the properties of a run and saves them to a
 // run info struct for later use
 func decodeRun(run gopptx.DecodeRuns) runInfo {
 	text := run.Text
@@ -88,7 +88,7 @@ func decodeParagraph(paragraph gopptx.DecodeParagraph) string {
 
 	for i := 0; i < len(runs); {
 		current := runs[i]
-		
+
 		// Combine consecutive runs with identical formatting.
 		j := i + 1
 		for j < len(runs) && runs[j].Bold == current.Bold && runs[j].Italic == current.Italic {
