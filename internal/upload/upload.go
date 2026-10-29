@@ -30,34 +30,34 @@ type SlideContent struct {
 // into plain text with appropiate HTML tags, include <p> to denote a new line,
 // <i> to denote italics, and <b> to denote boldness. 
 func DecodePPTX(uploadData PresentationUpload) ([]SlideContent, error) {
-  defer os.Remove(uploadData.TmpFilePath)
+	defer os.Remove(uploadData.TmpFilePath)
 	
 	f, err := gopptx.OpenFile(uploadData.TmpFilePath)
 	if err != nil {
-    return nil, fmt.Errorf("failed to open temp file: %w", err)
-  }
-  defer f.Close()
+		return nil, fmt.Errorf("failed to open temp file: %w", err)
+	}
+	defer f.Close()
 
 	// read slide data
 	slides := make([]SlideContent, len(f.Presentation.Slides.Slide))
 
 	for i, slide := range f.Presentation.Slides.Slide {
-    shapes, err := f.GetShapes(slide.SlideID)
-    if err != nil {
-      return nil, fmt.Errorf("Error reading shapes from slide %d: %v", slide.SlideID, err)
-    }
+		shapes, err := f.GetShapes(slide.SlideID)
+		if err != nil {
+			return nil, fmt.Errorf("Error reading shapes from slide %d: %v", slide.SlideID, err)
+		}
 
-    //fmt.Printf("Slide %d (index %d):\n", slide.SlideID, i)
+		//fmt.Printf("Slide %d (index %d):\n", slide.SlideID, i)
 		slides[i].ID = slide.SlideID
 		slides[i].Index = i
 
 		content := ""
-    for _, shape := range shapes {
+		for _, shape := range shapes {
 			//fmt.Printf("Type: %T, Value: %+v\n", shape.TextBody.Paragraph, shape.TextBody.Paragraph)
 			for _, paragraph := range shape.TextBody.Paragraph {
 				content += "<p>" + decodeParagraph(paragraph) + "</p>"
-    	}
-    }
+			}
+		}
 		slides[i].Content = content
 	}
 
@@ -79,38 +79,38 @@ func decodeRun(run gopptx.DecodeRuns) runInfo {
 // decodeParagraph decodes all the runs inside a paragraph, and combines them
 // based on similar formatting to save space and reduce number of redundant tags
 func decodeParagraph(paragraph gopptx.DecodeParagraph) string {
-    runs := make([]runInfo, len(paragraph.Runs))
-    for i, run := range paragraph.Runs {
-        runs[i] = decodeRun(run)
-    }
+	runs := make([]runInfo, len(paragraph.Runs))
+	for i, run := range paragraph.Runs {
+		runs[i] = decodeRun(run)
+	}
 
-    var result strings.Builder
+	var result strings.Builder
 
-    for i := 0; i < len(runs); {
-      current := runs[i]
+	for i := 0; i < len(runs); {
+		current := runs[i]
+		
+		// Combine consecutive runs with identical formatting.
+		j := i + 1
+		for j < len(runs) && runs[j].Bold == current.Bold && runs[j].Italic == current.Italic {
+			current.Text += runs[j].Text
+			j++
+		}
 
-      // Combine consecutive runs with identical formatting.
-      j := i + 1
-      for j < len(runs) && runs[j].Bold == current.Bold && runs[j].Italic == current.Italic {
-        current.Text += runs[j].Text
-        j++
-      }
+		// Apply formatting tags.
+		if current.Bold && current.Italic {
+			result.WriteString("<b><i>" + current.Text + "</i></b>")
+		} else if current.Bold {
+			result.WriteString("<b>" + current.Text + "</b>")
+		} else if current.Italic {
+			result.WriteString("<i>" + current.Text + "</i>")
+		} else {
+			result.WriteString(current.Text)
+		}
 
-      // Apply formatting tags.
-      if current.Bold && current.Italic {
-         result.WriteString("<b><i>" + current.Text + "</i></b>")
-      } else if current.Bold {
-        result.WriteString("<b>" + current.Text + "</b>")
-      } else if current.Italic {
-      	result.WriteString("<i>" + current.Text + "</i>")
-      } else {
-        result.WriteString(current.Text)
-      }
+		i = j
+	}
 
-      i = j
-    }
-
-    return result.String()
+	return result.String()
 }
 
 func DebugPrintSlides(slides []SlideContent) {
