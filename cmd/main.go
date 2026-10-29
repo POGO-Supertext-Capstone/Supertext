@@ -1,12 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"io"
 	"log"
 	"net/http"
-	"os"
-	"path"
-	"strings"
 
 	"github.com/POGO-Supertext-Capstone/Supertext/internal/upload"
 )
@@ -16,10 +14,6 @@ import (
 func v1_index(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/" {
 		http.ServeFile(w, r, "web/static/index.html")
-		return
-	}
-	if strings.HasPrefix(r.URL.Path, "/web/") {
-		http.ServeFile(w, r, "."+r.URL.Path)
 		return
 	}
 }
@@ -40,45 +34,33 @@ func v1_upload_post(w http.ResponseWriter, r *http.Request) {
 	name := r.FormValue("name")
 	file, h, err := r.FormFile("file")
 
-	http.Error(w, "Failed to read uploaded file", http.StatusBadRequest)
 	if err != nil {
+		http.Error(w, "Failed to read uploaded file", http.StatusBadRequest)
 		return
 	}
 	defer file.Close()
 
-	// create temp file to hold pptx data
-	tmpFile, err := os.CreateTemp("", "presentation-*"+path.Ext(h.Filename))
+	// Read the uploaded file before starting the goroutine.
+	data, err := io.ReadAll(file)
 	if err != nil {
-		http.Error(w, "Failed to create temporary file", http.StatusInternalServerError)
-		return
-	}
-	defer tmpFile.Close()
-
-	// copy contents to temp file
-	if _, err := io.Copy(tmpFile, file); err != nil {
-		http.Error(w, "Failed to save uploaded file", http.StatusInternalServerError)
+		http.Error(w, "Failed to read uploaded file", http.StatusInternalServerError)
 		return
 	}
 
-	// collect data for presentation upload
-	var uploadData upload.PresentationUpload
-	uploadData.PresentationName = name      // Presentation name (provided by user)
-	uploadData.Filename = h.Filename        // Original file name (provided by user)
-	uploadData.TmpFilePath = tmpFile.Name() // location of temp file
-
-	// Decode PPTX
-	go uploadPPTX(uploadData)
+	// The goroutine has an independent copy of the file data.
+	go uploadPPTX(name, h.Filename, bytes.NewReader(data))
 }
 
 // uploadPPTX handles the decoding and uplloading of a PPTX file
 // into the appropiate format to be saved in the database, and
 // parsed by other parts of the program
-func uploadPPTX(uploadData upload.PresentationUpload) {
-	slides, err := upload.DecodePPTX(uploadData)
+func uploadPPTX(name string, filename string, r io.Reader) {
+	slides, err := upload.DecodePPTX(r)
 	if err != nil {
-		log.Printf("Failed to decode PPTX: %v", err)
+		log.Printf("Failed to decode PPTX %q: %v", filename, err)
 		return
 	}
+
 	upload.DebugPrintSlides(slides)
 	// upload to database (TBI)
 }
@@ -87,6 +69,9 @@ func main() {
 	http.HandleFunc("/", v1_index)
 	http.HandleFunc("GET /v1/upload", v1_upload_get)
 	http.HandleFunc("POST /v1/upload", v1_upload_post)
+
+	fileServer := http.FileServer(http.Dir("web/"))
+	http.Handle("/web/", http.StripPrefix("/web/", fileServer))
 
 	log.Fatal(http.ListenAndServe(":8081", nil))
 }

@@ -2,20 +2,11 @@ package upload
 
 import (
 	"fmt"
-	"os"
+	"io"
 	"strings"
 
 	"github.com/kenny-not-dead/gopptx"
 )
-
-// PresentationUpload holds data provided by the user in
-// the form upload, as well as the temporay file location
-// holding the copy for decoding
-type PresentationUpload struct {
-	PresentationName string
-	Filename         string
-	TmpFilePath      string
-}
 
 // runInfo holds info about a run of text, including its
 // content and formatting
@@ -37,12 +28,10 @@ type SlideContent struct {
 // DecodePPTX goes throgh a powerpoint file and converts the slide content
 // into plain text with appropiate HTML tags, include <p> to denote a new line,
 // <i> to denote italics, and <b> to denote boldness.
-func DecodePPTX(uploadData PresentationUpload) ([]SlideContent, error) {
-	defer os.Remove(uploadData.TmpFilePath)
-
-	f, err := gopptx.OpenFile(uploadData.TmpFilePath)
+func DecodePPTX(r io.Reader) ([]SlideContent, error) {
+	f, err := gopptx.OpenReader(r) 
 	if err != nil {
-		return nil, fmt.Errorf("failed to open temp file: %w", err)
+		return nil, fmt.Errorf("failed to open PPTX: %w", err)
 	}
 	defer f.Close()
 
@@ -55,13 +44,11 @@ func DecodePPTX(uploadData PresentationUpload) ([]SlideContent, error) {
 			return nil, fmt.Errorf("Error reading shapes from slide %d: %v", slide.SlideID, err)
 		}
 
-		//fmt.Printf("Slide %d (index %d):\n", slide.SlideID, i)
 		slides[i].ID = slide.SlideID
 		slides[i].Index = i
 
 		content := ""
 		for _, shape := range shapes {
-			//fmt.Printf("Type: %T, Value: %+v\n", shape.TextBody.Paragraph, shape.TextBody.Paragraph)
 			for _, paragraph := range shape.TextBody.Paragraph {
 				if len(paragraph.Breaks) > 0 {
 					content += decodeLineBreakParagraph(paragraph)

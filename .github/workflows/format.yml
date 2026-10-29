@@ -17,9 +17,7 @@ jobs:
           go-version: '1.27.x'
       - name: Install Dependencies
         run: go mod tidy
-        env:
-          GOFLAGS: -mod=mod
       - name: Format
         run: go fmt ./...
       - name: Vet
-        run: go vet -mod=mod ./...
+        run: go vet ./...

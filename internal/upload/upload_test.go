@@ -1,9 +1,8 @@
 package upload
 
 import (
-	"io"
+	"bytes"
 	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/kenny-not-dead/gopptx"
@@ -179,15 +178,10 @@ func TestDecodeParagraph(t *testing.T) {
 // TestDecodePPTXInvalidFile tests that an invalid file will be
 // rejected by DecodePPTX method in upload.go
 func TestDecodePPTXInvalidFile(t *testing.T) {
-	tmpFile := filepath.Join(t.TempDir(), "invalid.pptx")
+	invalidData := []byte("not a PowerPoint file")
+	reader := bytes.NewReader(invalidData)
 
-	if err := os.WriteFile(tmpFile, []byte("not a PowerPoint file"), 0600); err != nil {
-		t.Fatal(err)
-	}
-
-	slides, err := DecodePPTX(PresentationUpload{
-		TmpFilePath: tmpFile,
-	})
+	slides, err := DecodePPTX(reader)
 
 	if err == nil {
 		t.Fatal("DecodePPTX() expected an error for an invalid file")
@@ -196,38 +190,20 @@ func TestDecodePPTXInvalidFile(t *testing.T) {
 	if slides != nil {
 		t.Errorf("DecodePPTX() slides = %v, want nil", slides)
 	}
-
-	// DecodePPTX should remove the temporary file, even on failure.
-	if _, err := os.Stat(tmpFile); !os.IsNotExist(err) {
-		t.Errorf("temporary file still exists or could not be checked: %v", err)
-	}
 }
 
 // TestDecodePPTXValidFile tests that the DecodePPTX method in upload.go
 // will accept good files, and decodes them properly.
 func TestDecodePPTXValidFile(t *testing.T) {
-	tmpFile, err := os.CreateTemp("", "presentation-*.pptx")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer tmpFile.Close()
-
 	srcFile, err := os.Open("../../test_resources/upload/valid.pptx")
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer srcFile.Close()
 
-	if _, err := io.Copy(tmpFile, srcFile); err != nil {
-		t.Fatal(err)
-	}
-
-	slides, err := DecodePPTX(PresentationUpload{
-		TmpFilePath: tmpFile.Name(),
-	})
-
+	slides, err := DecodePPTX(srcFile)
 	if err != nil {
-		t.Fatal("DecodePPTX() got an error for a valid file")
+		t.Fatalf("DecodePPTX() got an error for a valid file: %v", err)
 	}
 
 	expected := []string{
