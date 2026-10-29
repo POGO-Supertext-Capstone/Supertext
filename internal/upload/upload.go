@@ -29,7 +29,7 @@ type SlideContent struct {
 // into plain text with appropiate HTML tags, include <p> to denote a new line,
 // <i> to denote italics, and <b> to denote boldness.
 func DecodePPTX(r io.Reader) ([]SlideContent, error) {
-	f, err := gopptx.OpenReader(r) 
+	f, err := gopptx.OpenReader(r)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open PPTX: %w", err)
 	}
