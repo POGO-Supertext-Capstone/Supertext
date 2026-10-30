@@ -216,6 +216,7 @@ func TestDecodePPTXValidFile(t *testing.T) {
 		"<p>Test <b>Bold</b> and</p><p><i>Italic</i></p>",
 		"<p>Please silence all</p><p>electronic devices</p>",
 		"<p>Test Slide With</p><p>Animations</p>",
+		"<p></p>",
 	}
 
 	if len(slides) != len(expected) {
