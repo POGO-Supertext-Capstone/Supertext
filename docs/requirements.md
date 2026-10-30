@@ -1,7 +1,7 @@
 # Requirements
 
 ## Problem statement
-The Portland Opera House's main venue has a supertext display. This display is used to display translated lyrics in real time via a slideshow so that attendees can understand the story. POGO (Portland Opera on the go) wants a similar feature for their traveling performances, where people can connect and view the supertext in real time, possibly in remote areas without internet access.
+The Portland Opera's main venue has a supertext display. This display is used to display translated lyrics in real time via a slideshow so that attendees can understand the story. POGO (Portland Opera to Go) wants a similar feature for their traveling performances, where people can connect and view the supertext in real time, possibly in remote areas without internet access.
 
 ## Functional requirements
 ### FR-1: Browser Based Attendee Access
@@ -24,11 +24,11 @@ An attendee's browser automatically displays the same supertext slide as the sho
 1. Given an attendee is connected to an active session, when the show runner advances to another slide, then the attendee's browser displays the new slide without requiring a page refresh.
 2. Given an attendee joins an active session after the performance has started, when the connection is established, then the attendee sees the currently active slide.
 
-### FR-2: Local Network Connectivity
+### FR-3: Local Network Connectivity
 
 The system allows attendees to receive supertext through a local wireless network provided by a Raspberry Pi without an external internet connection.
 
-**Requirement Clasification:** Must (Required to support traveling performances without reliable internet)
+**Requirement Classification:** Must (Required to support traveling performances without reliable internet)
 
 **Acceptance Criteria:**
 1. Given the attendee is connected to the Raspberry Pi hosting an active supertext session, when the attendee navigates to the provided session URL without external internet access, then the attendee can access the supertext.
@@ -74,10 +74,10 @@ The system should be able to display presentations including different colored t
 1. Given a slide contains some form of animation, when the show runner switches to that slide, then the animation should play for the attendee.
 
 ## Non-functional requirements
-- **NFR-1:** Compatibility: The attendee interface works in the latest stable versions of Chrome, Safari, and Firefox.
+- **NFR-1:** Compatibility: The attendee interface works in the latest stable versions of Chrome, Safari, and Firefox on mobile.
 - **NFR-2:** Responsive Design: The supertext remains visible without horizontal scrolling on supported smartphone and tablet screen sizes.
 - **NFR-3:** Performance: The attendee interface displays a slide update within 250ms (to be confirmed) after the show runner advances the slide.
-- **NFR-4:** Accessibility: The attendee interface supports keyboard navigation and provides sufficient text/background contrast to meet WCAG 2.2 AA requirements.
+- **NFR-4:** Accessibility: The attendee interface provides sufficient text/background contrast to meet WCAG 2.2 AA requirements.
 
 ## Constraints
 - C-1: Attendees access supertext through a web browser rather than a dedicated mobile application.
