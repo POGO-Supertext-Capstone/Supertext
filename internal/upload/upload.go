@@ -57,6 +57,9 @@ func DecodePPTX(r io.Reader) ([]SlideContent, error) {
 				}
 			}
 		}
+		if content == "" {
+			content = "<p></p>"
+		}
 		slides[i].Content = content
 	}
 
