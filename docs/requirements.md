@@ -1,14 +1,14 @@
 # Requirements
 
 ## Problem statement
-The Portland Opera House's main venue has a supertext display. This display is used to display translated lyrics in real time via a slideshow so that attedees can understand the story. POGO (Portland Opera on the go) wants a similar feature for their traveling performances, where people can connect and view the supertext in real time, possibly in remote areas without internet access.
+The Portland Opera House's main venue has a supertext display. This display is used to display translated lyrics in real time via a slideshow so that attendees can understand the story. POGO (Portland Opera on the go) wants a similar feature for their traveling performances, where people can connect and view the supertext in real time, possibly in remote areas without internet access.
 
 ## Functional requirements
 ### FR-1: Browser Based Attendee Access
 
 An attendee can access the active performance's supertext through a web browser on their personal device.
 
-**Requirement Clasification:** Must (Explicit requirement by project partner)
+**Requirement Classification:** Must (Explicit requirement by project partner)
 
 **Acceptance Criteria:**
 1. Given an active supertext session, when an attendee navigates to the session's provided URL, then the browser displays the current supertext slide.
@@ -18,7 +18,7 @@ An attendee can access the active performance's supertext through a web browser 
 
 An attendee's browser automatically displays the same supertext slide as the show runner's display.
 
-**Requirement Clasification:** Must (Explicit requirement by project partner)
+**Requirement Classification:** Must (Explicit requirement by project partner)
 
 **Acceptance Criteria:**
 1. Given an attendee is connected to an active session, when the show runner advances to another slide, then the attendee's browser displays the new slide without requiring a page refresh.
@@ -38,7 +38,7 @@ The system allows attendees to receive supertext through a local wireless networ
 
 The system allows multiple attendees to access the same active supertext session simultaneously.
 
-**Requirement Clasification:** Must (Required for multiple attendees to use the system during a performance)
+**Requirement Classification:** Must (Required for multiple attendees to use the system during a performance)
 
 **Acceptance Criteria:**
 1. Given an active supertext session, when two or more attendee devices connect to the session, then all connected devices display the same current slide.
@@ -46,9 +46,9 @@ The system allows multiple attendees to access the same active supertext session
 
 ### FR-5: Accessibility Features
 
-The system interacts with the attendee's phone's accessability features for accessibility devices
+The system interacts with the attendee's phone's accessibility features for accessibility devices
 
-**Requirement Clasification:** Must (Explicit requirement by project partner)
+**Requirement Classification:** Must (Explicit requirement by project partner)
 
 **Acceptance Criteria:**
 1. Given an attendee is connected to an active supertext session, when the slide changes on their phone, then the phone's accessibility features can recognize that change.
@@ -58,17 +58,17 @@ The system interacts with the attendee's phone's accessability features for acce
 
 The system should be able to provide a HTTPS connection to attendees
 
-**Requirement Clasification:** Must (Explicit requirement by project partner to avoid scare screens)
+**Requirement Classification:** Must (Explicit requirement by project partner to avoid scare screens)
 
 **Acceptance Criteria:**
 1. Given the Raspberry Pi is connected to the internet, then the system should update the SSL/TLS certificates automatically.
-2. Given the Raspberry Pi isn't able to update the SSL/TLS ceryifiates before they expire, the show runners should be made aware so that they can connect it to the internet.
+2. Given the Raspberry Pi isn't able to update the SSL/TLS certificates before they expire, the show runners should be made aware so that they can connect it to the internet.
 
 ### FR-7: Presentation Enhancement
 
 The system should be able to display presentations including different colored text, and animations
 
-**Requirement Clasification** Could (Not yet confirmed with project partner)
+**Requirement Classification** Could (Not yet confirmed with project partner)
 
 **Acceptance Criteria:**
 1. Given a slide contains some form of animation, when the show runner switches to that slide, then the animation should play for the attendee.
@@ -82,12 +82,12 @@ The system should be able to display presentations including different colored t
 ## Constraints
 - C-1: Attendees access supertext through a web browser rather than a dedicated mobile application.
 - C-2: The system must be capable of operating without an external internet connection.
-- C-3: Supertext server must run on a Raspberry Pi. 
+- C-3: Supertext server must run on a Raspberry Pi.
 
 ## Success metrics
-- Server can handle 250 concurrant attendees recieveing slides.
+- The server can handle 250 concurrent attendees receiving slides.
 - Show runners can go through the entire process from upload to present without show-stopping errors
-- Attendees can recieve real time supertext without any display desyncronization or crashing
+- Attendees can receive real time supertext without any display desynchronization or crashing
 
 ## Non-goals
 - Developing a native iOS or Android application.
