@@ -74,7 +74,14 @@ func uploadPPTX(name string, filename string, r io.Reader) {
 		log.Printf("Failed to decode PPTX %q: %v", filename, err)
 		return
 	}
-	database.UploadShow(slides, name, filename)
+	ds, err := database.Open()
+	if err != nil {
+		log.Printf("Failed to open DataStore %s", err)
+		return
+	}
+	defer ds.Close()
+
+	ds.UploadShow(slides, name, filename)
 }
 
 func main() {

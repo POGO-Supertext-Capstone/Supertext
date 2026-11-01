@@ -1,11 +1,11 @@
 package database
 
 import (
+	"encoding/json"
+	"reflect"
+	"strings"
 	"testing"
 	"uuid"
-	"encoding/json"
-	"strings"
-	"reflect"
 
 	"github.com/POGO-Supertext-Capstone/Supertext/internal/upload"
 )
@@ -20,12 +20,18 @@ func TestUploadShow(t *testing.T) {
 	}
 	testShowFilename := "test.pptx"
 
-	err := UploadShow(slides, testShow, testShowFilename)
+	ds, err := Open()
+	if err != nil {
+		t.Fatalf("Failed to open DataStore %s", err)
+	}
+	defer ds.Close()
+
+	err = ds.UploadShow(slides, testShow, testShowFilename)
 	if err != nil {
 		t.Fatalf("UploadPPTX failed: %s", err)
 	}
 
-	filename, err := GetShowFilename(testShow)
+	filename, err := ds.GetShowFilename(testShow)
 	if err != nil {
 		t.Fatalf("GetShowFilename failed: %s", err)
 	}
@@ -34,7 +40,7 @@ func TestUploadShow(t *testing.T) {
 		t.Errorf("expected test.pptx, got %s", filename)
 	}
 
-	err = DeleteShow(testShow)
+	err = ds.DeleteShow(testShow)
 	if err != nil {
 		t.Fatalf("DeleteShow failed: %s", err)
 	}
@@ -57,7 +63,7 @@ func TestShowEncode(t *testing.T) {
 		},
 		{
 			name: "Empty Slideshow",
-			run: []upload.SlideContent{},
+			run:  []upload.SlideContent{},
 			want: `[]`,
 		},
 		{
@@ -75,21 +81,27 @@ func TestShowEncode(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			showName := uuid.New().String()
 
+			ds, err := Open()
+			if err != nil {
+				t.Fatalf("Failed to open DataStore %s", err)
+			}
+			defer ds.Close()
+
 			// Clean up test bucket
 			defer func() {
-				if err := DeleteShow(showName); err != nil {
+				if err := ds.DeleteShow(showName); err != nil {
 					t.Errorf("failed to delete test show: %s", err)
 				}
 			}()
 
 			// Upload test slides
-			err := UploadShow(tt.run, showName, "dummy.pptx")
+			err = ds.UploadShow(tt.run, showName, "dummy.pptx")
 			if err != nil {
 				t.Fatalf("UploadShow() failed: %s", err)
 			}
 
 			// Retrieve raw JSON
-			got, err := GetShowJSON(showName)
+			got, err := ds.GetShowJSON(showName)
 			if err != nil {
 				t.Fatalf("GetShowJSON() failed: %s", err)
 			}
@@ -97,7 +109,7 @@ func TestShowEncode(t *testing.T) {
 			if !json.Valid(got) {
 				t.Fatal("GetShowJSON() returned invalid JSON")
 			}
-			
+
 			// Compare JSON
 			if strings.TrimSpace(string(got)) != tt.want {
 				t.Errorf("GetShowJSON() = %s, want %s", got, tt.want)
@@ -122,7 +134,7 @@ func TestShowEncodeDecode(t *testing.T) {
 		},
 		{
 			name: "Empty Slideshow",
-			run: []upload.SlideContent{},
+			run:  []upload.SlideContent{},
 		},
 		{
 			name: "Long Slideshow",
@@ -175,25 +187,31 @@ func TestShowEncodeDecode(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			showName := uuid.New().String()
 
+			ds, err := Open()
+			if err != nil {
+				t.Fatalf("Failed to open DataStore %s", err)
+			}
+			defer ds.Close()
+
 			// Clean up test bucket
 			defer func() {
-				if err := DeleteShow(showName); err != nil {
+				if err := ds.DeleteShow(showName); err != nil {
 					t.Errorf("failed to delete test show: %s", err)
 				}
 			}()
 
 			// Upload test slides
-			err := UploadShow(tt.run, showName, "dummy.pptx")
+			err = ds.UploadShow(tt.run, showName, "dummy.pptx")
 			if err != nil {
 				t.Fatalf("UploadShow() failed: %s", err)
 			}
 
 			// Retrieve slides
-			got, err := GetShowSlides(showName)
+			got, err := ds.GetShowSlides(showName)
 			if err != nil {
 				t.Fatalf("GetShowSlides() failed: %s", err)
 			}
-			
+
 			// ensure slides going in match slides going out
 			if !reflect.DeepEqual(got, tt.run) {
 				t.Errorf("GetShowSlides() = %v, want %v", got, tt.run)
@@ -201,4 +219,3 @@ func TestShowEncodeDecode(t *testing.T) {
 		})
 	}
 }
-

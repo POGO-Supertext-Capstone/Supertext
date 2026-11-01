@@ -1,8 +1,8 @@
 package database
 
 import (
-	"encoding/json"
 	"bytes"
+	"encoding/json"
 	"fmt"
 
 	"github.com/POGO-Supertext-Capstone/Supertext/internal/upload"
@@ -12,26 +12,23 @@ import (
 // uploadShow uploads the slides for a show into the supertext bucket. Uses
 // the show's name as the bucket, and holds the data as "text": json slide content
 // and "filename": filename of show
-func UploadShow(slides []upload.SlideContent, name string, filename string) error {
-	dataStore, err := Open()
-	if err != nil {
-		return fmt.Errorf("UploadShow() failed to open db: %s", err)
-	}
-	defer dataStore.Close()
+//
+// Assumes database is open
+func (ds *DataStore) UploadShow(slides []upload.SlideContent, name string, filename string) error {
 
 	// Serialize slides
 	var buf bytes.Buffer
 
 	encoder := json.NewEncoder(&buf)
-	encoder.SetEscapeHTML(false)	// so HTML tags can be read in JSON
+	encoder.SetEscapeHTML(false) // so HTML tags can be read in JSON
 
-	err = encoder.Encode(slides)
+	err := encoder.Encode(slides)
 	if err != nil {
 		return fmt.Errorf("failed to serialize slides: %s", err)
 	}
 	data := buf.Bytes()
 
-	err = dataStore.db.Update(func(tx *bolt.Tx) error {
+	err = ds.db.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte("supertext"))
 		if bucket == nil {
 			return fmt.Errorf("supertext bucket does not exist")
@@ -59,16 +56,13 @@ func UploadShow(slides []upload.SlideContent, name string, filename string) erro
 }
 
 // GetShowSlides grabs the slides for a show in the SlideContent struct
-func GetShowSlides(name string) ([]upload.SlideContent, error) {
-	dataStore, err := Open()
-	if err != nil {
-		return nil, fmt.Errorf("GetShowSlides() failed to open db: %s", err)
-	}
-	defer dataStore.Close()
+//
+// Assumes database is open
+func (ds *DataStore) GetShowSlides(name string) ([]upload.SlideContent, error) {
 
 	var slides []upload.SlideContent
 
-	err = dataStore.db.View(func(tx *bolt.Tx) error {
+	err := ds.db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte("supertext"))
 		if bucket == nil {
 			return fmt.Errorf("supertext bucket does not exist")
@@ -99,16 +93,12 @@ func GetShowSlides(name string) ([]upload.SlideContent, error) {
 }
 
 // GetShowJSON retrieves the raw JSON slide data for a show
-func GetShowJSON(name string) ([]byte, error) {
-	dataStore, err := Open()
-	if err != nil {
-		return nil, fmt.Errorf("GetShowJSON() failed to open db: %s", err)
-	}
-	defer dataStore.Close()
-
+//
+// Assumes database is open
+func (ds *DataStore) GetShowJSON(name string) ([]byte, error) {
 	var data []byte
 
-	err = dataStore.db.View(func(tx *bolt.Tx) error {
+	err := ds.db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte("supertext"))
 		if bucket == nil {
 			return fmt.Errorf("supertext bucket does not exist")
@@ -138,16 +128,12 @@ func GetShowJSON(name string) ([]byte, error) {
 }
 
 // GetShowFilename grabs the show's file name from the database
-func GetShowFilename(name string) (string, error) {
-	dataStore, err := Open()
-	if err != nil {
-		return "", fmt.Errorf("GetShowSlides() failed to open db: %s", err)
-	}
-	defer dataStore.Close()
-
+//
+// Assumes database is open
+func (ds *DataStore) GetShowFilename(name string) (string, error) {
 	var filename string
 
-	err = dataStore.db.View(func(tx *bolt.Tx) error {
+	err := ds.db.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte("supertext"))
 		if bucket == nil {
 			return fmt.Errorf("supertext bucket does not exist")
@@ -175,14 +161,11 @@ func GetShowFilename(name string) (string, error) {
 	return filename, nil
 }
 
-func DeleteShow(name string) error {
-	dataStore, err := Open()
-	if err != nil {
-		return fmt.Errorf("DeleteShow() failed to open db: %s", err)
-	}
-	defer dataStore.Close()
-
-	err = dataStore.db.Update(func(tx *bolt.Tx) error {
+// DeleteShow deletes a show from the database
+//
+// Assumes database is open
+func (ds *DataStore) DeleteShow(name string) error {
+	err := ds.db.Update(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte("supertext"))
 		if bucket == nil {
 			return fmt.Errorf("supertext bucket does not exist")
