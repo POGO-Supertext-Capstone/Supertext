@@ -35,7 +35,7 @@ Rely on basic, unauthenticated static HTML forms or manual command-line database
 
 - **Benefits:** Zero initial development overhead for UI routing.
 - **Costs:** Severe security vulnerabilities, high operational friction during live rehearsals, zero visual verification tools for showrunners, and extreme risk of human error during showtime.
-- **Right choice when:"** The application is an internal developer utility with a single technical user and zero live performance time constraints
+- **Right choice when:** The application is an internal developer utility with a single technical user and zero live performance time constraints
 
 ### Option D: Static file re-uploading for every edit
 Require showrunners to re-upload the entire source presentation file every time a single type or line correction is needed during rehearsal. 
