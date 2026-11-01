@@ -78,7 +78,7 @@ I propose a hybrid approach to the client side frontend. It would allow us to ha
 How we will know it worked:
 - **Scale:** If at least 250 people can connect to the server at the same time and receive slide transitions
 - **Latency:** If the DOM is updated on people's phones within 50-100ms after the slide transition message was sent
-- **Accessability:** If the phone's built-in accessibility features can detect the DOM change for accessibility devices
+- **Accessibility:** If the phone's built-in accessibility features can detect the DOM change for accessibility devices
 
 These criteria should be tested throughout the development process, and should be a required CI/CD element once the walking skeleton is complete.
 
