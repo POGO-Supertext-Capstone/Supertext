@@ -1,0 +1,184 @@
+package database
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+
+	"github.com/POGO-Supertext-Capstone/Supertext/internal/upload"
+	bolt "go.etcd.io/bbolt"
+)
+
+// uploadShow uploads the slides for a show into the supertext bucket. Uses
+// the show's name as the bucket, and holds the data as "text": json slide content
+// and "filename": filename of show
+//
+// Assumes database is open
+func (ds *DataStore) UploadShow(slides []upload.SlideContent, name string, filename string) error {
+
+	// Serialize slides
+	var buf bytes.Buffer
+
+	encoder := json.NewEncoder(&buf)
+	encoder.SetEscapeHTML(false) // so HTML tags can be read in JSON
+
+	err := encoder.Encode(slides)
+	if err != nil {
+		return fmt.Errorf("failed to serialize slides: %s", err)
+	}
+	data := buf.Bytes()
+
+	err = ds.db.Update(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte("supertext"))
+		if bucket == nil {
+			return fmt.Errorf("supertext bucket does not exist")
+		}
+
+		// grabs show bucket. If another show with the same name exists, will
+		// use that bucket
+		showBucket, err := bucket.CreateBucketIfNotExists([]byte(name))
+		if err != nil {
+			return fmt.Errorf("failed to create show bucket %s: %s", name, err)
+		}
+
+		if err := showBucket.Put([]byte("text"), data); err != nil {
+			return fmt.Errorf("failed to store slides: %s", err)
+		}
+
+		if err := showBucket.Put([]byte("filename"), []byte(filename)); err != nil {
+			return fmt.Errorf("failed to upload filename: %s", err)
+		}
+
+		return nil
+	})
+
+	return err
+}
+
+// GetShowSlides grabs the slides for a show in the SlideContent struct
+//
+// Assumes database is open
+func (ds *DataStore) GetShowSlides(name string) ([]upload.SlideContent, error) {
+
+	var slides []upload.SlideContent
+
+	err := ds.db.View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte("supertext"))
+		if bucket == nil {
+			return fmt.Errorf("supertext bucket does not exist")
+		}
+
+		showBucket := bucket.Bucket([]byte(name))
+		if showBucket == nil {
+			return fmt.Errorf("show bucket %s does not exist", name)
+		}
+
+		data := showBucket.Get([]byte("text"))
+		if data == nil {
+			return fmt.Errorf("no slide data found for show %s", name)
+		}
+
+		// convert back to SlideContent
+		if err := json.Unmarshal(data, &slides); err != nil {
+			return fmt.Errorf("failed to deserialize slides: %s", err)
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+	return slides, nil
+}
+
+// GetShowJSON retrieves the raw JSON slide data for a show
+//
+// Assumes database is open
+func (ds *DataStore) GetShowJSON(name string) ([]byte, error) {
+	var data []byte
+
+	err := ds.db.View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte("supertext"))
+		if bucket == nil {
+			return fmt.Errorf("supertext bucket does not exist")
+		}
+
+		showBucket := bucket.Bucket([]byte(name))
+		if showBucket == nil {
+			return fmt.Errorf("show bucket %s does not exist", name)
+		}
+
+		value := showBucket.Get([]byte("text"))
+		if value == nil {
+			return fmt.Errorf("no slide data found for show %s", name)
+		}
+
+		// Copy data
+		data = append([]byte(nil), value...)
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
+}
+
+// GetShowFilename grabs the show's file name from the database
+//
+// Assumes database is open
+func (ds *DataStore) GetShowFilename(name string) (string, error) {
+	var filename string
+
+	err := ds.db.View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte("supertext"))
+		if bucket == nil {
+			return fmt.Errorf("supertext bucket does not exist")
+		}
+
+		showBucket := bucket.Bucket([]byte(name))
+		if showBucket == nil {
+			return fmt.Errorf("show bucket %s does not exist", name)
+		}
+
+		// grab filename
+		data := showBucket.Get([]byte("filename"))
+		if data == nil {
+			return fmt.Errorf("no filename found for show %s", name)
+		}
+		filename = string(data)
+
+		return nil
+	})
+
+	if err != nil {
+		return "", err
+	}
+
+	return filename, nil
+}
+
+// DeleteShow deletes a show from the database
+//
+// Assumes database is open
+func (ds *DataStore) DeleteShow(name string) error {
+	err := ds.db.Update(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte("supertext"))
+		if bucket == nil {
+			return fmt.Errorf("supertext bucket does not exist")
+		}
+
+		// Delete the show bucket
+		err := bucket.DeleteBucket([]byte(name))
+		if err != nil {
+			return fmt.Errorf("failed to delete show %s: %s", name, err)
+		}
+
+		return nil
+	})
+
+	return err
+}

@@ -19,6 +19,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/POGO-Supertext-Capstone/Supertext/internal/database"
 	"github.com/POGO-Supertext-Capstone/Supertext/internal/upload"
 )
 
@@ -73,9 +74,14 @@ func uploadPPTX(name string, filename string, r io.Reader) {
 		log.Printf("Failed to decode PPTX %q: %v", filename, err)
 		return
 	}
+	ds, err := database.Open()
+	if err != nil {
+		log.Printf("Failed to open DataStore %s", err)
+		return
+	}
+	defer ds.Close()
 
-	upload.DebugPrintSlides(slides)
-	// upload to database (TBI)
+	ds.UploadShow(slides, name, filename)
 }
 
 func main() {
