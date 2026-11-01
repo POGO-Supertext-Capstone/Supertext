@@ -16,7 +16,7 @@ The administration page will be built as a protected server-rendered module with
 ### Core architectural decisions:
 - **Unified Go backend Route:** Admin route handlers will reside in the core Go binary running on the Raspberry Pi 5, ensuring zero extra external service dependencies.
 
-- **File ingestion and visual verification pipeline:** The portal will accept initial slideshow file formats (e.g., .pptx, .txt), parse raw files into structured application records, and save those records within the database engine, rendering a visual verification view so the showrunner can review slide sequencing before showtime
+- **File ingestion and visual verification pipeline:** The portal will accept initial slideshow file formats (e.g., .pptx, .txt), parse raw files into structured application records, and save those records within the database engine ([ADR-002])(https://github.com/POGO-Supertext-Capstone/Supertext/blob/main/docs/adr/ADR-002-DATABASE.md), rendering a visual verification view so the showrunner can review slide sequencing before showtime
   
 - **In-place slide editing API:** The admin interface will support direct, on-device slide text editing via the UI so showrunners can make corrections during rehearsal or pre-show checks without needing to re-upload the entire source presentation file.
   
