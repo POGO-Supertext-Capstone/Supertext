@@ -33,9 +33,9 @@ type runInfo struct {
 // including its index (order in presentation), its unique slide ID
 // and the text content in that slide
 type SlideContent struct {
-	Index   int
-	ID      int
-	Content string
+	Index   int    `json:"index"`
+	ID      int    `json:"id"`
+	Content string `json:"text"`
 }
 
 // DecodePPTX goes throgh a powerpoint file and converts the slide content
