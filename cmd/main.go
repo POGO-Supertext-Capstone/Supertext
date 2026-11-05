@@ -61,19 +61,26 @@ func v1_upload_post(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	ds := database.UseDB(r)
+
 	// The goroutine has an independent copy of the file data.
-	go uploadPPTX(name, h.Filename, bytes.NewReader(data))
+	go uploadPPTX(ds, name, h.Filename, bytes.NewReader(data))
 }
 
 // uploadPPTX handles the decoding and uplloading of a PPTX file
 // into the appropiate format to be saved in the database, and
 // parsed by other parts of the program
-func uploadPPTX(name string, filename string, r io.Reader) {
+func uploadPPTX(ds *database.DataStore, name string, filename string, r io.Reader) {
 	slides, err := upload.DecodePPTX(r)
 	if err != nil {
 		log.Printf("Failed to decode PPTX %q: %v", filename, err)
 		return
 	}
+
+	ds.UploadShow(slides, name, filename)
+}
+
+func main() {
 	ds, err := database.Open()
 	if err != nil {
 		log.Printf("Failed to open DataStore %s", err)
@@ -81,13 +88,9 @@ func uploadPPTX(name string, filename string, r io.Reader) {
 	}
 	defer ds.Close()
 
-	ds.UploadShow(slides, name, filename)
-}
-
-func main() {
-	http.HandleFunc("/", v1_index)
-	http.HandleFunc("GET /v1/upload", v1_upload_get)
-	http.HandleFunc("POST /v1/upload", v1_upload_post)
+	http.Handle("/", database.HandlerFunc(ds, v1_index))
+	http.Handle("GET /v1/upload", database.HandlerFunc(ds, v1_upload_get))
+	http.Handle("POST /v1/upload", database.HandlerFunc(ds, v1_upload_post))
 
 	fileServer := http.FileServer(http.Dir("web/"))
 	http.Handle("/web/", http.StripPrefix("/web/", fileServer))
