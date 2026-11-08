@@ -18,6 +18,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"fmt"
 
 	"github.com/POGO-Supertext-Capstone/Supertext/internal/database"
 	"github.com/POGO-Supertext-Capstone/Supertext/internal/upload"
@@ -65,6 +66,8 @@ func v1_upload_post(w http.ResponseWriter, r *http.Request) {
 
 	// The goroutine has an independent copy of the file data.
 	go uploadPPTX(ds, name, h.Filename, bytes.NewReader(data))
+
+	fmt.Fprintf(w, "<p>File Uploaded</p>")
 }
 
 // uploadPPTX handles the decoding and uplloading of a PPTX file
