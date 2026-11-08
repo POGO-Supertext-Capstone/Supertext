@@ -20,6 +20,7 @@ import (
 	"net/http"
 
 	"github.com/POGO-Supertext-Capstone/Supertext/internal/database"
+	"github.com/POGO-Supertext-Capstone/Supertext/internal/events"
 	"github.com/POGO-Supertext-Capstone/Supertext/internal/upload"
 )
 
@@ -30,6 +31,10 @@ func v1_index(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "web/static/index.html")
 		return
 	}
+}
+
+func v1_slides(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "web/static/viewer.html")
 }
 
 // v1_upload_get handles all GET requests coming through the
@@ -89,8 +94,12 @@ func main() {
 	defer ds.Close()
 
 	http.Handle("/", database.HandlerFunc(ds, v1_index))
+	http.Handle("/viewer", database.HandlerFunc(ds, v1_slides))
 	http.Handle("GET /v1/upload", database.HandlerFunc(ds, v1_upload_get))
 	http.Handle("POST /v1/upload", database.HandlerFunc(ds, v1_upload_post))
+
+	http.Handle("/v1/slides", database.HandlerFunc(ds, events.V1_Slide_Content))
+	http.Handle("/v1/present", database.HandlerFunc(ds, events.V1_SSE_Viewer))
 
 	fileServer := http.FileServer(http.Dir("web/"))
 	http.Handle("/web/", http.StripPrefix("/web/", fileServer))

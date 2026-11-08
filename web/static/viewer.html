@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/web/js/htmx.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/htmx-ext-sse@2.2.4" integrity="sha384-A986SAtodyH8eg8x8irJnYUk7i9inVQqYigD6qZ9evobksGNIXfeFvDwLSHcp31N" crossorigin="anonymous"></script>
+    <title>Show Viewer</title>
+  </head>
+
+  <body hx-ext="sse">
+    <div id="slideLoader"
+      hx-ext="sse"
+      sse-connect="/v1/present"
+      sse-swap="Event"
+      hx-trigger="Event"
+      style="display: none">
+    </div>
+
+    <div id="slides" hx-swap="innerHTML"></div>
+
+    <script>
+      async function getSlides() {
+        const url = "/v1/slides";
+        try {
+          const res = await fetch(url);
+          if (!res.ok) {
+            throw new Error(res.status);
+          }
+
+          const result = await res.json();
+          return result;
+        } catch (error) {
+          alert(error.message)
+        }
+      }
+
+      let slides;
+      (async () => {
+        slides = await getSlides();
+      })();
+      document.body.addEventListener('htmx:sseBeforeMessage', (e) => {
+        const idx = e.detail.data;
+        htmx.swap("#slides", slides.slides[idx].text, {swapStyle: 'innerHTML'});
+      })
+    </script>
+  </body>
+</html>
