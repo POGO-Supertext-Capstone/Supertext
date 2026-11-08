@@ -182,3 +182,31 @@ func (ds *DataStore) DeleteShow(name string) error {
 
 	return err
 }
+
+// GetAllShows lists all shows currently stored within the database
+//
+// Assumes database is open
+func (ds *DataStore) GetAllShows() ([]string, error) {
+	var shows []string
+
+	err := ds.db.View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte("supertext"))
+		if bucket == nil {
+			return fmt.Errorf("supertext bucket does not exist")
+		}
+
+		bucket.ForEach(func(k, _ []byte) error {
+			showBucket := bucket.Bucket(k)
+			if showBucket == nil {
+				return nil
+			}
+
+			shows = append(shows, string(k))
+			return nil
+		})
+
+		return nil
+	})
+
+	return shows, err
+}

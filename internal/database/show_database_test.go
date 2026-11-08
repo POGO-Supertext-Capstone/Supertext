@@ -2,6 +2,7 @@ package database
 
 import (
 	"encoding/json"
+	"os"
 	"reflect"
 	"strings"
 	"testing"
@@ -43,6 +44,63 @@ func TestUploadShow(t *testing.T) {
 	err = ds.DeleteShow(testShow)
 	if err != nil {
 		t.Fatalf("DeleteShow failed: %s", err)
+	}
+}
+
+// TestGetAllShows tests that a dummy show can be uploaded to the database,
+// and the GetAllShows function will get all uploaded shows correctly
+func TestGetAllShows(t *testing.T) {
+	testShow := "Test Show"
+	slides := []upload.SlideContent{
+		{Index: 1, ID: 1, Content: "<p>This is a test presentation</p>"},
+		{Index: 2, ID: 2, Content: "<p>for TestUploadShow()</p>"},
+	}
+	testShowFilename := "test.pptx"
+
+	srcFile, err := os.Open("../../test_resources/upload/valid.pptx")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer srcFile.Close()
+
+	secondTestShow := "Valid Show"
+	secondSlides, err := upload.DecodePPTX(srcFile)
+	secondTestShowFilename := "valid.pptx"
+
+	ds, err := Open()
+	if err != nil {
+		t.Fatalf("Failed to open DataStore %s", err)
+	}
+	defer ds.Close()
+
+	err = ds.UploadShow(slides, testShow, testShowFilename)
+	if err != nil {
+		t.Fatalf("TestGetAllShows() failed: %s", err)
+	}
+
+	err = ds.UploadShow(secondSlides, secondTestShow, secondTestShowFilename)
+	if err != nil {
+		t.Fatalf("TestGetAllShows() failed: %s", err)
+	}
+
+	expected := []string{
+		"Test Show",
+		"Valid Show",
+	}
+	shows, err := ds.GetAllShows()
+
+	if err != nil {
+		t.Fatalf("TestGetAllShows() failed: %s", err)
+	}
+
+	if len(shows) != len(expected) {
+		t.Errorf("TestGetAllShows() expected %d shows, got %d", len(expected), len(shows))
+	}
+
+	for i, show := range shows {
+		if expected[i] != show {
+			t.Errorf("TestGetAllShows() show %d: Expected %s, got %s", i, expected[i], show)
+		}
 	}
 }
 

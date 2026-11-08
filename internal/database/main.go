@@ -5,6 +5,8 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"testing"
+	"uuid"
 
 	bolt "go.etcd.io/bbolt"
 )
@@ -20,7 +22,13 @@ const DATABASE_SCHEMA_VERSION = "1"
 // Gets the filesystem path where to store the database
 // The database is either stored within XDG_CONFIG_HOME or XDG_DATA_HOME ($HOME/.config, $HOME/.local/share) respectively,
 // within the Supertext folder.
+//
+// When in testing, the database path is randomly generated to a file within the operating system temp directory ($TMPDIR or /tmp).
 func ConstructDatabasePath() string {
+	if testing.Testing() {
+		return filepath.Join(os.TempDir(), uuid.New().String()+".db")
+	}
+
 	dir, dirErr := os.UserConfigDir()
 	if dirErr != nil {
 		dir = os.Getenv("XDG_DATA_HOME")
