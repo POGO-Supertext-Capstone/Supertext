@@ -1,0 +1,15 @@
+[Unit]
+Description=Supertext Opera Server
+After=network.target NetworkManager.service dnsmasq.service
+
+[Service]
+Type=simple
+User=@APP_USER@
+WorkingDirectory=@PROJECT_DIR@
+ExecStart=@PROJECT_DIR@/build/supertext_server
+Restart=on-failure
+RestartSec=5
+Environment=XDG_DATA_HOME=@APP_HOME@/.local/share
+
+[Install]
+WantedBy=multi-user.target

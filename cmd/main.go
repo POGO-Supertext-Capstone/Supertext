@@ -26,10 +26,7 @@ import (
 // v1_index handles default HTTP file requests, as well as directing to
 // the home page when requested
 func v1_index(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path == "/" {
-		http.ServeFile(w, r, "web/static/index.html")
-		return
-	}
+	http.ServeFile(w, r, "web/static/index.html")
 }
 
 // v1_upload_get handles all GET requests coming through the
@@ -80,17 +77,26 @@ func uploadPPTX(ds *database.DataStore, name string, filename string, r io.Reade
 	ds.UploadShow(slides, name, filename)
 }
 
+// captive_portal_redirect redirects operating system connectivity
+// checks to the supertext portal
+func captive_portal_redirect(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, "http://10.42.0.1:8081/", http.StatusFound)
+}
+
 func main() {
 	ds, err := database.Open()
 	if err != nil {
 		log.Printf("Failed to open DataStore %s", err)
-		return
 	}
 	defer ds.Close()
 
 	http.Handle("/", database.HandlerFunc(ds, v1_index))
 	http.Handle("GET /v1/upload", database.HandlerFunc(ds, v1_upload_get))
 	http.Handle("POST /v1/upload", database.HandlerFunc(ds, v1_upload_post))
+
+	http.HandleFunc("/generate_204", captive_portal_redirect)
+	http.HandleFunc("/hotspot-detect.html", captive_portal_redirect)
+	http.HandleFunc("/connecttest.txt", captive_portal_redirect)
 
 	fileServer := http.FileServer(http.Dir("web/"))
 	http.Handle("/web/", http.StripPrefix("/web/", fileServer))
