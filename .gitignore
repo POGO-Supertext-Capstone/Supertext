@@ -1,0 +1,5 @@
+# compiled server binaries; rebuilt on the Pi by scripts/setup_pi.sh and scripts/deploy.sh
+/build/
+
+# Raspberry Pi provisioning: never commit a real hotspot password
+supertext.env

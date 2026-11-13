@@ -1,0 +1,20 @@
+#cloud-config
+
+# install curl so we can download the Supertext bootstrap script
+packages:
+  - curl
+
+# run the Supertext bootstrap script as root
+runcmd:
+  - |
+    set -eu
+
+    echo "Starting Supertext first-boot provisioning..."
+
+    curl -fsSL --retry 5 --retry-delay 5 \
+      https://raw.githubusercontent.com/POGO-Supertext-Capstone/Supertext/main/scripts/first_boot.sh \
+      -o /root/supertext-first-boot.sh
+
+    chmod 0700 /root/supertext-first-boot.sh
+
+    /root/supertext-first-boot.sh
