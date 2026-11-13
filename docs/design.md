@@ -231,29 +231,27 @@ flowchart LR
         direction LR
         subgraph ST["Bucket: supertext"]
             S1["schema → #quot;1#quot;"]
-            S2["shows → [show names]"]
-            S3["admin account details"]
-        end
-        subgraph SH1["Bucket: #lt;show name#gt;"]
-            T1["text → processed supertext"]
-            O1["other show info (as needed)"]
-        end
-        subgraph SH2["Bucket: #lt;another show#gt;"]
-            T2["text → processed supertext"]
+            S2["admin account details"]
+            subgraph SH1["Bucket: #lt;show name#gt;"]
+                T1["text → processed supertext json"]
+                T3["filename"]
+                O1["other show info (as needed)"]
+            end
+            subgraph SH2["Bucket: #lt;another show#gt;"]
+                T2["text → processed supertext json"]
+            end
         end
     end
-    S2 -. "names" .-> SH1
-    S2 -. "names" .-> SH2
 ```
 
 - **`supertext` bucket:** the primary bucket.
   - `schema`: the database schema version (`DATABASE_SCHEMA_VERSION`, currently
     `"1"`).
-  - `shows`: an array of show names.
   - Admin user account details.
 - **One bucket per show:** each is named after its entry in `shows`.
   - `text`: the processed supertext, i.e. the HTML slide content produced by
     upload processing.
+  - `filename`: name of the slideshow that was uploaded
   - Any other show information, if it's needed.
 
 ### Implementation status
@@ -261,8 +259,6 @@ flowchart LR
 - `database.Open()` creates the `supertext` bucket and writes `schema` if it's
   missing. If the stored version doesn't match `DATABASE_SCHEMA_VERSION`, it
   only logs a warning for now; this is the place where migrations would run.
-- `shows`, the per-show buckets, and admin account storage aren't implemented
-  yet.
 - **File location:** ADR-002 specifies `supertext.db` under `$XDG_DATA_HOME`.
   The code uses `os.UserConfigDir()/Supertext/database.db` and falls back to
   `$XDG_DATA_HOME/Supertext/database.db`.
