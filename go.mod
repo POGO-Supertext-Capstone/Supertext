@@ -1,6 +1,6 @@
 module github.com/POGO-Supertext-Capstone/Supertext
 
-go 1.27.1
+go 1.27.4
 
 require (
 	github.com/kenny-not-dead/gopptx v0.7.0
