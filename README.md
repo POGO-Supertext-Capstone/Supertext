@@ -5,7 +5,7 @@ that attendees already own.
 
 ## Quickstart
 
-If you haven't already, install [Go 1.27 or later](https://go.dev/dl/).
+If you haven't already, install [Go 1.27.4 or later](https://go.dev/dl/).
 
 With Go installed, run `go run ./...` and visit [localhost:8081](http://localhost:8081) in a web browser.
 
