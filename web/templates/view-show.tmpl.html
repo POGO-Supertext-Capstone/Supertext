@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>{{.Name}}</title>
+	</head>
+	<body>
+		<h1>{{.Name}}</h1>
+		<table data-hx-target="closest tr" data-hx-swap="outerHTML">
+			<thead>
+				<tr>
+					<td>Index</td>
+					<td>Content</td>
+					<td></td>
+				</tr>
+			</thead>
+			{{ range .Slides }}
+			<tr>
+				<td>{{.Index}}</td>
+				<td>{{.HTML}}</td>
+				<td><button data-hx-get="/v1/shows/{{.Name}}/{{.ID}}/edit"
+				        data-hx-trigger="edit"
+				        onClick="let editing = document.querySelector('.editing')
+                         if(editing) {
+                           Swal.fire({title: 'Already Editing',
+                                      showCancelButton: true,
+                                      confirmButtonText: 'Yep, Edit This Row!',
+                                      text:'Hey!  You are already editing a row!  Do you want to cancel that edit and continue?'})
+                           .then((result) => {
+                                if(result.isConfirmed) {
+                                   htmx.trigger(editing, 'cancel')
+                                   htmx.trigger(this, 'edit')
+                                }
+                            })
+                         } else {
+                            htmx.trigger(this, 'edit')
+                         }"
+				>Edit</button></td>
+			</tr>
+
+			{{ end }}
+		</table>
+	</body>
+</html>

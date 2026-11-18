@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-//go:embed static js
+//go:embed static js templates
 var embedFS embed.FS
 
 // StaticHandler handlers file based web content. If in dev mode, the handler
