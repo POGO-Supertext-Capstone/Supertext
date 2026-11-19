@@ -37,14 +37,16 @@ func main() {
 	}
 	defer ds.Close()
 
-	web.UseDevTemplates(true)
+	web.UseDevTemplates(devMode)
 
-	http.Handle("/", database.HandlerFunc(ds, web.V1_index))
-	http.Handle("GET /v1/list-shows", database.HandlerFunc(ds, web.V1_list_shows))
-	http.Handle("GET /v1/show/{name}/{id}", database.HandlerFunc(ds, web.V1_edit_show_get))
+	http.Handle("GET /v1/shows", database.HandlerFunc(ds, web.V1_list_shows))
+	http.Handle("GET /v1/show/{name}/{id}/edit", database.HandlerFunc(ds, web.V1_edit_show_get))
+	http.Handle("GET /v1/show/{name}/{id}", database.HandlerFunc(ds, web.V1_slide_get))
+	http.Handle("PUT /v1/show/{name}/{id}", database.HandlerFunc(ds, web.V1_slide_put))
 	http.Handle("GET /v1/show/{name}", database.HandlerFunc(ds, web.V1_view_show))
 	http.Handle("GET /v1/upload", database.HandlerFunc(ds, web.V1_upload_get))
 	http.Handle("POST /v1/upload", database.HandlerFunc(ds, web.V1_upload_post))
+	http.Handle("/", database.HandlerFunc(ds, web.V1_index))
 
 	http.Handle("/web/", web.StaticHandler(devMode))
 

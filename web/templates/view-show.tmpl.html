@@ -4,42 +4,29 @@
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<title>{{.Name}}</title>
+		<script src="/web/js/htmx.min.js"></script>
+		<style>
+			.slides {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+			}
+			.content {
+				padding: 0.5em;
+				background-color: black;
+				color: white;
+			}
+		</style>
 	</head>
 	<body>
 		<h1>{{.Name}}</h1>
-		<table data-hx-target="closest tr" data-hx-swap="outerHTML">
-			<thead>
-				<tr>
-					<td>Index</td>
-					<td>Content</td>
-					<td></td>
-				</tr>
-			</thead>
+		<div data-hx-target:inherited="closest div" data-hx-swap:inherited="outerHTML" class="slides">
 			{{ range .Slides }}
-			<tr>
-				<td>{{.Index}}</td>
-				<td>{{.HTML}}</td>
-				<td><button data-hx-get="/v1/shows/{{.Name}}/{{.ID}}/edit"
-				        data-hx-trigger="edit"
-				        onClick="let editing = document.querySelector('.editing')
-                         if(editing) {
-                           Swal.fire({title: 'Already Editing',
-                                      showCancelButton: true,
-                                      confirmButtonText: 'Yep, Edit This Row!',
-                                      text:'Hey!  You are already editing a row!  Do you want to cancel that edit and continue?'})
-                           .then((result) => {
-                                if(result.isConfirmed) {
-                                   htmx.trigger(editing, 'cancel')
-                                   htmx.trigger(this, 'edit')
-                                }
-                            })
-                         } else {
-                            htmx.trigger(this, 'edit')
-                         }"
-				>Edit</button></td>
-			</tr>
+			<div class="slide">
+				<div class="content">{{.HTML}}</div>
+				<button data-hx-get="/v1/show/{{$.Name}}/{{.ID}}/edit">Edit</button>
+			</div>
 
 			{{ end }}
-		</table>
+		</div>
 	</body>
 </html>

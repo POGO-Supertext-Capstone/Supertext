@@ -1,12 +1,5 @@
-<tr hx-trigger='cancel' class='editing' hx-get="/v1/slide/{{.Name}}/{{.ID}}/edit">
-  <td><div contenteditable="true" data-field="text">{{.Text}}</div></td>
-  <td>
-    <button class="btn danger" hx-get="/v1/slide/{{.Name}}/{{.ID}}">Cancel</button>
-    <button class="btn danger"
-            hx-put="/v1/slide/{{.Name}}/{{.ID}}"
-            hx-include="closest tr"
-            hx-vals='js:text: this.closest("tr").querySelector("[data-field=text]").innerHTML'>
-      Save
-    </button>
-  </td>
-</tr>
+<div class="slide">
+	<div contenteditable="true" data-field="content" class="content">{{.HTML}}</div>
+	<button class="btn danger" hx-get="/v1/show/{{.Name}}/{{.ID}}">Cancel</button>
+	<button class="btn danger" hx-put="/v1/show/{{.Name}}/{{.ID}}" hx-include="closest div" hx-vals='js:content: this.closest("div").querySelector("[data-field=content]").innerHTML'>Save</button>
+</div>
