@@ -7,7 +7,7 @@ on:
     branches: ["main"]
 
 jobs:
-  test:
+  format:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -18,6 +18,6 @@ jobs:
       - name: Install Dependencies
         run: go mod tidy
       - name: Format
-        run: go fmt ./...
+        run: diff -u <(echo -n) <(gofmt -d -l ./)
       - name: Vet
         run: go vet ./...
