@@ -1,0 +1,60 @@
+<!--
+Copyright (C) 2026 Jamie Murphy
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="htmx-config" content='{"noSwap": [500]}'>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/web/js/htmx.min.js"></script>
+    <script src="/web/js/hx-sse.min.js"></script>
+    <title>Viewer</title>
+  </head>
+
+  <body hx-ext="sse">
+    <div id="slides"
+      hx-sse:connect="/v1/stream"
+      hx-target="this"
+      hx-on:slideUpdate="this.innerHTML = slides[event.detail.data].text"
+      hx-swap="innerHTML">
+    </div>
+
+    <script>
+      async function getSlides() {
+        const url = "/v1/slides";
+        try {
+          const res = await fetch(url);
+          if (!res.ok) {
+            throw new Error(res.status);
+          }
+
+          const result = await res.json();
+          return result.slides;
+        } catch (error) {
+          alert(error.message)
+        }
+      }
+
+      let slides;
+      // Asynchronously load slide data
+      (async () => {
+        slides = await getSlides();
+      })();
+    </script>
+  </body>
+</html>

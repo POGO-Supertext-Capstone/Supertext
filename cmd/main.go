@@ -21,6 +21,7 @@ import (
 	"net/http"
 
 	"github.com/POGO-Supertext-Capstone/Supertext/internal/database"
+	"github.com/POGO-Supertext-Capstone/Supertext/internal/present"
 	"github.com/POGO-Supertext-Capstone/Supertext/internal/upload"
 )
 
@@ -31,6 +32,18 @@ func v1_index(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "web/static/index.html")
 		return
 	}
+}
+
+// v1_view handles all requests for the
+// /v1/view endpoint. Returns the HTML page for the show viewer
+func v1_view(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "web/static/view.html")
+}
+
+// v1_present handles all requests for the
+// /v1/present endpoint. Returns the HTML page for the show presenter
+func v1_present(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "web/static/present.html")
 }
 
 // v1_upload_get handles all GET requests coming through the
@@ -84,16 +97,24 @@ func uploadPPTX(ds *database.DataStore, name string, filename string, r io.Reade
 }
 
 func main() {
+	sp := present.NewSlidePublisher()
 	ds, err := database.Open()
 	if err != nil {
 		log.Printf("Failed to open DataStore %s", err)
 		return
 	}
+	defer sp.Quit()
 	defer ds.Close()
 
 	http.Handle("/", database.HandlerFunc(ds, v1_index))
 	http.Handle("GET /v1/upload", database.HandlerFunc(ds, v1_upload_get))
 	http.Handle("POST /v1/upload", database.HandlerFunc(ds, v1_upload_post))
+
+	http.Handle("/v1/view", database.HandlerFunc(ds, v1_view))
+	http.Handle("/v1/slides", present.Handler(sp, database.HandlerFunc(ds, present.V1_Slides)))
+	http.Handle("/v1/stream", present.HandlerFunc(sp, present.V1_Stream))
+	http.Handle("GET /v1/present", database.HandlerFunc(ds, v1_present))
+	http.Handle("POST /v1/present/", present.Handler(sp, database.HandlerFunc(ds, present.V1_Present_Post)))
 
 	fileServer := http.FileServer(http.Dir("web/"))
 	http.Handle("/web/", http.StripPrefix("/web/", fileServer))
