@@ -15,10 +15,10 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
-	"fmt"
 
 	"github.com/POGO-Supertext-Capstone/Supertext/internal/database"
 	"github.com/POGO-Supertext-Capstone/Supertext/internal/upload"
