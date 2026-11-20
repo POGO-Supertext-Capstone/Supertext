@@ -183,6 +183,45 @@ func (ds *DataStore) DeleteShow(name string) error {
 	return err
 }
 
+// UpdateShowSlides updates the slide content of a given show
+//
+// Assumes database is open
+func (ds *DataStore) UpdateShowSlides(name string, slides []upload.SlideContent) error {
+
+	// Serialize slides
+	var buf bytes.Buffer
+
+	encoder := json.NewEncoder(&buf)
+	encoder.SetEscapeHTML(false) // so HTML tags can be read in JSON
+
+	err := encoder.Encode(slides)
+	if err != nil {
+		return fmt.Errorf("failed to serialize slides: %s", err)
+	}
+	data := buf.Bytes()
+
+	err = ds.db.Update(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte("supertext"))
+		if bucket == nil {
+			return fmt.Errorf("supertext bucket does not exist")
+		}
+
+		// Grabs show bucket.
+		showBucket := bucket.Bucket([]byte(name))
+		if showBucket == nil {
+			return fmt.Errorf("show bucket %s does not exist", name)
+		}
+
+		if err := showBucket.Put([]byte("text"), data); err != nil {
+			return fmt.Errorf("failed to store slides: %s", err)
+		}
+
+		return nil
+	})
+
+	return err
+}
+
 // GetAllShows lists all shows currently stored within the database
 //
 // Assumes database is open

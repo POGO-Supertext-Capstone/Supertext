@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>{{.Name}}</title>
+		<script src="/web/js/htmx.min.js"></script>
+		<style>
+			.slides {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+			}
+			.content {
+				padding: 0.5em;
+				background-color: black;
+				color: white;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>{{.Name}}</h1>
+		<div data-hx-target:inherited="closest div" data-hx-swap:inherited="outerHTML" class="slides">
+			{{ range .Slides }}
+			<div class="slide">
+				<div class="content">{{.HTML}}</div>
+				<button data-hx-get="/v1/show/{{$.Name}}/{{.ID}}/edit">Edit</button>
+			</div>
+
+			{{ end }}
+		</div>
+	</body>
+</html>

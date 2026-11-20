@@ -1,0 +1,5 @@
+<div class="slide">
+	<div contenteditable="true" data-field="content" class="content">{{.HTML}}</div>
+	<button class="btn danger" hx-get="/v1/show/{{.Name}}/{{.ID}}">Cancel</button>
+	<button class="btn danger" hx-put="/v1/show/{{.Name}}/{{.ID}}" hx-include="closest div" hx-vals='js:content: this.closest("div").querySelector("[data-field=content]").innerHTML'>Save</button>
+</div>
