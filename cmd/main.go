@@ -25,21 +25,25 @@ import (
 
 func main() {
 	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
+	if err != nil && !os.IsNotExist(err) {
+		log.Fatalf("Error loading .env file: %s", err)
 	}
 	_, devMode := os.LookupEnv("DEV")
 
 	ds, err := database.Open()
 	if err != nil {
-		log.Printf("Failed to open DataStore %s", err)
-		return
+		log.Fatalf("Failed to open DataStore: %s", err)
 	}
 	defer ds.Close()
 
 	http.Handle("/", database.HandlerFunc(ds, web.V1_index))
 	http.Handle("GET /v1/upload", database.HandlerFunc(ds, web.V1_upload_get))
 	http.Handle("POST /v1/upload", database.HandlerFunc(ds, web.V1_upload_post))
+
+	// connectivity checks from phones and laptops that join the hotspot
+	http.HandleFunc("/generate_204", web.Captive_portal_redirect)
+	http.HandleFunc("/hotspot-detect.html", web.Captive_portal_redirect)
+	http.HandleFunc("/connecttest.txt", web.Captive_portal_redirect)
 
 	http.Handle("/web/", web.StaticHandler(devMode))
 
