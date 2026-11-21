@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-	"uuid"
 
 	bolt "go.etcd.io/bbolt"
 )
@@ -26,7 +25,13 @@ const DATABASE_SCHEMA_VERSION = "1"
 // When in testing, the database path is randomly generated to a file within the operating system temp directory ($TMPDIR or /tmp).
 func ConstructDatabasePath() string {
 	if testing.Testing() {
-		return filepath.Join(os.TempDir(), uuid.New().String()+".db")
+
+		if dataDir := os.Getenv("SUPERTEXT_DATA_DIR"); dataDir != "" {
+			if err := os.MkdirAll(dataDir, 0750); err != nil {
+				log.Fatalf("Unable to create storage directory %s: %s", dataDir, err)
+			}
+			return filepath.Join(dataDir, "database.db")
+		}
 	}
 
 	dir, dirErr := os.UserConfigDir()
