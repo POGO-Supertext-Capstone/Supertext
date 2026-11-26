@@ -17,6 +17,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"uuid"
 
 	"github.com/kenny-not-dead/gopptx"
 )
@@ -34,7 +35,7 @@ type runInfo struct {
 // and the text content in that slide
 type SlideContent struct {
 	Index   int    `json:"index"`
-	ID      int    `json:"id"`
+	ID      string `json:"id"`
 	Content string `json:"text"`
 }
 
@@ -57,7 +58,7 @@ func DecodePPTX(r io.Reader) ([]SlideContent, error) {
 			return nil, fmt.Errorf("Error reading shapes from slide %d: %v", slide.SlideID, err)
 		}
 
-		slides[i].ID = slide.SlideID
+		slides[i].ID = uuid.New().String()
 		slides[i].Index = i
 
 		content := ""
@@ -169,11 +170,17 @@ func encodeRunTags(runs []runInfo) string {
 
 		// Apply formatting tags.
 		if current.Bold && current.Italic {
-			result.WriteString("<b><i>" + current.Text + "</i></b>")
+			result.WriteString("<b><i>")
+			result.WriteString(current.Text)
+			result.WriteString("</i></b>")
 		} else if current.Bold {
-			result.WriteString("<b>" + current.Text + "</b>")
+			result.WriteString("<b>")
+			result.WriteString(current.Text)
+			result.WriteString("</b>")
 		} else if current.Italic {
-			result.WriteString("<i>" + current.Text + "</i>")
+			result.WriteString("<i>")
+			result.WriteString(current.Text)
+			result.WriteString("</i>")
 		} else {
 			result.WriteString(current.Text)
 		}
@@ -186,7 +193,7 @@ func encodeRunTags(runs []runInfo) string {
 
 func DebugPrintSlides(slides []SlideContent) {
 	for _, slide := range slides {
-		fmt.Printf("Slide %d (ID: %d)", slide.Index, slide.ID)
+		fmt.Printf("Slide %d (ID: %s)", slide.Index, slide.ID)
 		fmt.Println(slide.Content)
 	}
 }
