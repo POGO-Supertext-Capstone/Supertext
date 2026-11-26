@@ -17,7 +17,9 @@ type DataStore struct {
 }
 
 // Update this number whenever the database schema changes
-const DATABASE_SCHEMA_VERSION = "1"
+// Ver 1: initial version
+// Ver 2: slide id field in json switch from integer to string
+const DATABASE_SCHEMA_VERSION = "2"
 
 // Gets the filesystem path where to store the database
 // The database is either stored within XDG_CONFIG_HOME or XDG_DATA_HOME ($HOME/.config, $HOME/.local/share) respectively,
